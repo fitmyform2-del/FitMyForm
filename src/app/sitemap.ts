@@ -4,6 +4,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://fitmyform.com';
   const routes = [
     '',
+    '/pdf-tools/sign',
+    '/esignature-features',
+    '/esignature-compliance-standards',
+    '/esignature-security',
+    '/legal-validity',
+    '/esignatures-for-insurance',
+    '/esignatures-for-real-estate',
+    '/esignatures-for-financial-services',
+    '/esignatures-for-legal-services',
+    '/esignatures-for-human-resources',
+    '/esignatures-for-sales',
     '/photo-resizer',
     '/signature-resizer',
     '/image-compressor',

@@ -22,7 +22,16 @@ import {
   Layers,
   Clock,
   FileStack,
-  Image as ImageIcon
+  Image as ImageIcon,
+  PenTool,
+  Award,
+  ShieldCheck,
+  Scale,
+  Umbrella,
+  Building2,
+  Landmark,
+  Users,
+  BarChart3
 } from 'lucide-react';
 import { PresetSelectorModal } from '../presets/PresetSelectorModal';
 import { PDF_TOOLS } from '@/config/pdfToolsConfig';
@@ -37,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
   const [isImageToolsMenuOpen, setIsImageToolsMenuOpen] = useState(false);
   const [isPdfMenuOpen, setIsPdfMenuOpen] = useState(false);
+  const [isSignMenuOpen, setIsSignMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -85,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
                 FitMy<span className="gradient-text font-black">Form</span>
               </span>
               <span className="block text-[10px] text-indigo-300/80 -mt-1 font-semibold tracking-wider uppercase">
-                iLoveIMG & Document Suite
+                iLoveIMG & iLoveSign Suite
               </span>
             </div>
           </Link>
@@ -102,18 +112,100 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
 
           {/* Navigation Links */}
           <nav className="flex items-center gap-1.5 sm:gap-2">
+            {/* iLoveSign Suite Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsSignMenuOpen(!isSignMenuOpen);
+                  setIsImageToolsMenuOpen(false);
+                  setIsPdfMenuOpen(false);
+                }}
+                onBlur={() => setTimeout(() => setIsSignMenuOpen(false), 250)}
+                className="flex items-center gap-1.5 text-xs font-extrabold px-3.5 py-2 rounded-xl text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all shadow-sm cursor-pointer"
+              >
+                <PenTool className="w-4 h-4 text-emerald-400" />
+                <span>iLoveSign</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSignMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isSignMenuOpen && (
+                <div className="absolute top-full right-0 lg:left-0 lg:right-auto mt-2 w-[340px] bg-[#0d121e] border border-white/15 rounded-2xl shadow-2xl p-3 z-50 divide-y divide-white/10 backdrop-blur-2xl animate-fade-in">
+                  <div className="px-3 py-2 text-[10px] font-black uppercase text-emerald-400 tracking-wider flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <PenTool className="w-3.5 h-3.5 text-emerald-400" />
+                      iLoveSign e-Sign Suite
+                    </span>
+                    <span className="text-slate-400 font-mono text-[9px]">eIDAS Compliant</span>
+                  </div>
+
+                  <div className="py-2 space-y-1">
+                    <Link
+                      href="/pdf-tools/sign"
+                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-white bg-indigo-600/30 hover:bg-indigo-600/50 transition-colors"
+                    >
+                      <PenTool className="w-4 h-4 text-emerald-400" />
+                      <span>Fill & e-Sign PDF Workspace →</span>
+                    </Link>
+                    <Link
+                      href="/esignature-features"
+                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4 text-indigo-400" />
+                      <span>eSignature Features</span>
+                    </Link>
+                    <Link
+                      href="/esignature-compliance-standards"
+                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Award className="w-4 h-4 text-cyan-400" />
+                      <span>Signature Standards (SES, AES, QES)</span>
+                    </Link>
+                    <Link
+                      href="/esignature-security"
+                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Security & Zero-Server Trust</span>
+                    </Link>
+                    <Link
+                      href="/legal-validity"
+                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Scale className="w-4 h-4 text-amber-400" />
+                      <span>Legal Validity & Enforceability</span>
+                    </Link>
+                  </div>
+
+                  <div className="pt-2 space-y-1">
+                    <div className="px-3 py-1 text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                      Industries Solutions
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 text-[11px]">
+                      <Link href="/esignatures-for-insurance" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Insurance</Link>
+                      <Link href="/esignatures-for-real-estate" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Real Estate</Link>
+                      <Link href="/esignatures-for-financial-services" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Finance</Link>
+                      <Link href="/esignatures-for-legal-services" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Legal</Link>
+                      <Link href="/esignatures-for-human-resources" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">HR & Hiring</Link>
+                      <Link href="/esignatures-for-sales" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">B2B Sales</Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* All Image Tools Dropdown */}
             <div className="relative">
               <button
                 onClick={() => {
                   setIsImageToolsMenuOpen(!isImageToolsMenuOpen);
                   setIsPdfMenuOpen(false);
+                  setIsSignMenuOpen(false);
                 }}
                 onBlur={() => setTimeout(() => setIsImageToolsMenuOpen(false), 250)}
-                className="flex items-center gap-1.5 text-xs font-extrabold px-3.5 py-2 rounded-xl text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition-all shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition-all shadow-sm cursor-pointer"
               >
                 <ImageIcon className="w-4 h-4 text-indigo-400" />
-                <span>All Image Tools</span>
+                <span className="hidden sm:inline">Image Tools</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isImageToolsMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -161,6 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
                 onClick={() => {
                   setIsPdfMenuOpen(!isPdfMenuOpen);
                   setIsImageToolsMenuOpen(false);
+                  setIsSignMenuOpen(false);
                 }}
                 onBlur={() => setTimeout(() => setIsPdfMenuOpen(false), 250)}
                 className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer"
@@ -214,14 +307,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
               <Layers className="w-4 h-4 text-emerald-400" />
               <span className="hidden md:inline">Exam Presets</span>
             </button>
-
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all"
-            >
-              <Clock className="w-4 h-4 text-cyan-400" />
-              <span className="hidden lg:inline">History</span>
-            </Link>
           </nav>
         </div>
       </header>
