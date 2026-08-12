@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HelpCircle, CheckCircle2, ShieldCheck, Zap, FileText } from 'lucide-react';
+import { HelpCircle, CheckCircle2, ShieldCheck, Zap, FileText, Sparkles } from 'lucide-react';
 
 interface SeoContentSectionProps {
   title: string;
@@ -55,7 +55,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
   };
 
   return (
-    <section className="mt-16 border-t border-gray-800/80 pt-12 space-y-12 max-w-4xl mx-auto">
+    <section className="mt-16 border-t border-white/10 pt-12 space-y-12 max-w-5xl mx-auto">
       {/* Structured Data Scripts */}
       <script
         type="application/ld+json"
@@ -67,89 +67,96 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
       />
 
       {/* Title & Overview */}
-      <div className="space-y-4 text-center sm:text-left">
-        <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
-        <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">{description}</p>
+      <div className="space-y-3 text-center sm:text-left">
+        <h2 className="text-2xl font-black text-white tracking-tight">{title}</h2>
+        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">{description}</p>
       </div>
 
       {/* Feature Highlights Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-400" />
-          <h3 className="font-bold text-sm text-white">100% Client-Side Privacy</h3>
-          <p className="text-xs text-gray-400 leading-normal">
-            No document is ever uploaded to any cloud server. Your sensitive photos, Aadhaar cards, and signatures remain safely inside your browser.
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-emerald-500/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          </div>
+          <h3 className="font-extrabold text-sm text-white">100% Client-Side Privacy</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            No document is ever uploaded to any cloud server. Your sensitive photos, Aadhaar cards, and signatures remain safely inside your browser memory.
           </p>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
-          <Zap className="w-6 h-6 text-blue-400" />
-          <h3 className="font-bold text-sm text-white">High-Precision Compression</h3>
-          <p className="text-xs text-gray-400 leading-normal">
+        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-indigo-500/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-indigo-400" />
+          </div>
+          <h3 className="font-extrabold text-sm text-white">High-Precision Compression</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
             Iterative binary search quality adjustments guarantee your file fits exactly inside the required KB window (e.g. 20–50 KB) without blurriness.
           </p>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
-          <FileText className="w-6 h-6 text-indigo-400" />
-          <h3 className="font-bold text-sm text-white">Official Exam Specs</h3>
-          <p className="text-xs text-gray-400 leading-normal">
+        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-cyan-500/40 transition-all">
+          <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-cyan-400" />
+          </div>
+          <h3 className="font-extrabold text-sm text-white">Official Exam Specs</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
             Pre-loaded requirements database for SSC, UPSC, IBPS, RRB Railway, NTA NEET/JEE, UPTET, CTET, and University Admissions.
           </p>
         </div>
       </div>
 
       {/* Common Exam Specifications Table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
-        <h3 className="font-bold text-base text-white">
-          Standard Indian Exam Document Requirements Cheat Sheet
+      <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl backdrop-blur-2xl">
+        <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-indigo-400" />
+          <span>Standard Indian Exam Document Requirements Cheat Sheet</span>
         </h3>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left text-gray-300">
-            <thead className="bg-gray-950 text-gray-400 uppercase font-mono text-[10px]">
+          <table className="w-full text-xs text-left text-slate-300">
+            <thead className="bg-[#080b11] text-slate-400 uppercase font-mono text-[10px] border-b border-white/10">
               <tr>
-                <th className="p-3">Exam Portal</th>
-                <th className="p-3">Doc Type</th>
-                <th className="p-3">Dimensions</th>
-                <th className="p-3">Target Size</th>
-                <th className="p-3">Format</th>
+                <th className="p-3.5">Exam Portal</th>
+                <th className="p-3.5">Doc Type</th>
+                <th className="p-3.5">Dimensions</th>
+                <th className="p-3.5">Target KB Limits</th>
+                <th className="p-3.5">Output Format</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800 font-mono">
+            <tbody className="divide-y divide-white/10 font-mono">
               <tr>
-                <td className="p-3 font-bold text-white">SSC (CGL/CHSL)</td>
-                <td className="p-3">Photo</td>
-                <td className="p-3 text-blue-300">200 × 230 px</td>
-                <td className="p-3 text-emerald-400">20 – 50 KB</td>
-                <td className="p-3">JPG / JPEG</td>
+                <td className="p-3.5 font-extrabold text-white">SSC (CGL/CHSL)</td>
+                <td className="p-3.5">Passport Photo</td>
+                <td className="p-3.5 text-indigo-300 font-bold">200 × 230 px</td>
+                <td className="p-3.5 text-emerald-400 font-bold">20 – 50 KB</td>
+                <td className="p-3.5">JPG / JPEG</td>
               </tr>
               <tr>
-                <td className="p-3 font-bold text-white">SSC (CGL/CHSL)</td>
-                <td className="p-3">Signature</td>
-                <td className="p-3 text-blue-300">140 × 60 px</td>
-                <td className="p-3 text-emerald-400">10 – 20 KB</td>
-                <td className="p-3">JPG / JPEG</td>
+                <td className="p-3.5 font-extrabold text-white">SSC (CGL/CHSL)</td>
+                <td className="p-3.5">Signature</td>
+                <td className="p-3.5 text-indigo-300 font-bold">140 × 60 px</td>
+                <td className="p-3.5 text-emerald-400 font-bold">10 – 20 KB</td>
+                <td className="p-3.5">JPG / JPEG</td>
               </tr>
               <tr>
-                <td className="p-3 font-bold text-white">UPSC Civil Services</td>
-                <td className="p-3">Photo & Sig</td>
-                <td className="p-3 text-blue-300">350 × 350 px (Min)</td>
-                <td className="p-3 text-emerald-400">20 – 300 KB</td>
-                <td className="p-3">JPG / JPEG</td>
+                <td className="p-3.5 font-extrabold text-white">UPSC Civil Services</td>
+                <td className="p-3.5">Photo & Sig</td>
+                <td className="p-3.5 text-indigo-300 font-bold">350 × 350 px (Min)</td>
+                <td className="p-3.5 text-emerald-400 font-bold">20 – 300 KB</td>
+                <td className="p-3.5">JPG / JPEG</td>
               </tr>
               <tr>
-                <td className="p-3 font-bold text-white">IBPS Banking</td>
-                <td className="p-3">Left Thumb</td>
-                <td className="p-3 text-blue-300">240 × 240 px</td>
-                <td className="p-3 text-emerald-400">20 – 50 KB</td>
-                <td className="p-3">JPG / JPEG</td>
+                <td className="p-3.5 font-extrabold text-white">IBPS Banking</td>
+                <td className="p-3.5">Left Thumb</td>
+                <td className="p-3.5 text-indigo-300 font-bold">240 × 240 px</td>
+                <td className="p-3.5 text-emerald-400 font-bold">20 – 50 KB</td>
+                <td className="p-3.5">JPG / JPEG</td>
               </tr>
               <tr>
-                <td className="p-3 font-bold text-white">Railway RRB</td>
-                <td className="p-3">Passport Photo</td>
-                <td className="p-3 text-blue-300">350 × 450 px</td>
-                <td className="p-3 text-emerald-400">20 – 50 KB</td>
-                <td className="p-3">JPG / JPEG</td>
+                <td className="p-3.5 font-extrabold text-white">Railway RRB</td>
+                <td className="p-3.5">Passport Photo</td>
+                <td className="p-3.5 text-indigo-300 font-bold">350 × 450 px</td>
+                <td className="p-3.5 text-emerald-400 font-bold">20 – 50 KB</td>
+                <td className="p-3.5">JPG / JPEG</td>
               </tr>
             </tbody>
           </table>
@@ -157,20 +164,22 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
       </div>
 
       {/* Frequently Asked Questions (FAQ) */}
-      <div className="space-y-4">
-        <h3 className="font-bold text-lg text-white flex items-center gap-2">
-          <HelpCircle className="w-5 h-5 text-blue-400" />
-          Frequently Asked Questions (FAQ)
+      <div className="space-y-5">
+        <h3 className="font-extrabold text-xl text-white flex items-center gap-2.5 tracking-tight">
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
+            <HelpCircle className="w-4 h-4 text-indigo-400" />
+          </div>
+          <span>Frequently Asked Questions (FAQ)</span>
         </h3>
 
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {faqs.map((faq, idx) => (
-            <div key={idx} className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-1.5">
-              <h4 className="font-semibold text-white text-sm flex items-start gap-2">
+            <div key={idx} className="bg-[#0d121e] border border-white/10 rounded-2xl p-5 space-y-2 shadow-lg backdrop-blur-2xl">
+              <h4 className="font-extrabold text-white text-sm flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>{faq.question}</span>
               </h4>
-              <p className="text-xs text-gray-400 pl-6 leading-relaxed">
+              <p className="text-xs text-slate-300 pl-6 leading-relaxed">
                 {faq.answer}
               </p>
             </div>
@@ -180,3 +189,4 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
     </section>
   );
 };
+

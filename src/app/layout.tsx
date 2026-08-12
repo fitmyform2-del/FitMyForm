@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f19",
+  themeColor: "#080b11",
   width: "device-width",
   initialScale: 1,
 };
@@ -34,6 +34,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://fitmyform.com"),
   alternates: {
     canonical: "/"
+  },
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
   openGraph: {
     title: "FitMyForm - Student Document Resizer & Formatter",
@@ -56,7 +61,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-[#0b0f19] text-gray-100 font-sans">
+      <body className="min-h-full flex flex-col bg-[#080b11] text-slate-100 font-sans selection:bg-indigo-600 selection:text-white">
         {children}
       </body>
     </html>

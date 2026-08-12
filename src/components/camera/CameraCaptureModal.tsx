@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, X, RefreshCw, Check, SwitchCamera, AlertCircle, Sparkles } from 'lucide-react';
+import { Camera, X, RefreshCw, Check, SwitchCamera, AlertCircle } from 'lucide-react';
 
 interface CameraCaptureModalProps {
   isOpen: boolean;
@@ -50,9 +50,10 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Camera access error:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      const error = err as { name?: string };
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setErrorMsg('Camera permission denied. Please allow camera access in your browser settings.');
       } else {
         setErrorMsg('Could not access camera device. Please check if camera is connected.');
@@ -63,11 +64,15 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   }, [facingMode]);
 
   useEffect(() => {
+    let active = true;
     if (isOpen && !capturedUrl) {
-      startCamera();
+      setTimeout(() => {
+        if (active) startCamera();
+      }, 0);
     }
 
     return () => {
+      active = false;
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;

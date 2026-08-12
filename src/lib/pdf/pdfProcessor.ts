@@ -9,8 +9,6 @@ export async function processPdfFile(
   const arrayBuffer = await file.arrayBuffer();
   const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
   
-  const pageCount = pdfDoc.getPageCount();
-
   // Create a copy of PDF document (re-compressing objects)
   const newPdf = await PDFDocument.create();
   const copiedPages = await newPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());

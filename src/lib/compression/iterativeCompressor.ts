@@ -59,7 +59,7 @@ export async function compressCanvasToTargetSize(
 
   let bestBlob: Blob | null = null;
   let bestQualityUsed = 0.9;
-  let currentCanvas = canvas;
+  const currentCanvas = canvas;
 
   if (mimeType === 'image/jpeg' || mimeType === 'image/webp') {
     let qLow = 0.01;
@@ -110,7 +110,6 @@ export async function compressCanvasToTargetSize(
       // Even at 0.01 quality, size exceeds maxBytes (e.g. extremely large pixel dimensions)
       // Iteratively downscale canvas slightly to fit within maxBytes
       let scaleFactor = 0.85;
-      let scaledCanvas = currentCanvas;
       while (scaleFactor >= 0.3) {
         const sw = Math.round(currentCanvas.width * scaleFactor);
         const sh = Math.round(currentCanvas.height * scaleFactor);
@@ -123,7 +122,6 @@ export async function compressCanvasToTargetSize(
           const trialBlob = await canvasToBlob(tmp, mimeType, 0.5);
           if (trialBlob.size <= maxBytes) {
             bestBlob = trialBlob;
-            scaledCanvas = tmp;
             break;
           }
         }

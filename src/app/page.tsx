@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { HeroSection } from '@/components/hero/HeroSection';
@@ -11,25 +12,52 @@ import { ImageComparisonPreview } from '@/components/preview/ImageComparisonPrev
 import { ValidationChecklist } from '@/components/validation/ValidationChecklist';
 import { RecentDocuments } from '@/components/dashboard/RecentDocuments';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
+import { PresetSelectorModal } from '@/components/presets/PresetSelectorModal';
 
+import { IMAGE_TOOLS, TOOL_CATEGORIES } from '@/config/imageToolsConfig';
+import { EXAM_PRESETS } from '@/config/presets';
 import {
   UploadedFile,
   DocumentRequirements,
   ProcessingResult,
   CropRect
 } from '@/types/document';
-import { EXAM_PRESETS } from '@/config/presets';
+
 import { loadImage, renderToCanvas } from '@/lib/image/resizer';
 import { compressCanvasToTargetSize } from '@/lib/compression/iterativeCompressor';
 import { processPdfFile } from '@/lib/pdf/pdfProcessor';
 import { saveRecentItem } from '@/lib/storage/sessionStore';
-import { PresetSelectorModal } from '@/components/presets/PresetSelectorModal';
 
-import { Sparkles, ArrowRight, RefreshCw, CheckCircle2, SlidersHorizontal, AlertCircle } from 'lucide-react';
+import {
+  Sparkles,
+  ArrowRight,
+  RefreshCw,
+  SlidersHorizontal,
+  AlertCircle,
+  CheckCircle2,
+  Search,
+  Minimize2,
+  Maximize2,
+  Crop,
+  FileImage,
+  Repeat,
+  Wand2,
+  Eraser,
+  Shield,
+  Smile,
+  RotateCw,
+  Code,
+  EyeOff,
+  Image as ImageIcon
+} from 'lucide-react';
 
 export default function HomePage() {
-  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  // Tool Grid State
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Exam Form Workspace State
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [requirements, setRequirements] = useState<DocumentRequirements>({
     documentType: 'photo',
     width: 200,
@@ -45,10 +73,37 @@ export default function HomePage() {
   const [cropRect, setCropRect] = useState<CropRect | undefined>(undefined);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingResult, setProcessingResult] = useState<ProcessingResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const getToolIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Minimize2': return <Minimize2 className="w-6 h-6 text-emerald-400" />;
+      case 'Maximize2': return <Maximize2 className="w-6 h-6 text-cyan-400" />;
+      case 'Crop': return <Crop className="w-6 h-6 text-indigo-400" />;
+      case 'FileImage': return <FileImage className="w-6 h-6 text-amber-400" />;
+      case 'Repeat': return <Repeat className="w-6 h-6 text-cyan-400" />;
+      case 'Wand2': return <Wand2 className="w-6 h-6 text-pink-400" />;
+      case 'Sparkles': return <Sparkles className="w-6 h-6 text-emerald-400" />;
+      case 'Eraser': return <Eraser className="w-6 h-6 text-indigo-400" />;
+      case 'Shield': return <Shield className="w-6 h-6 text-blue-400" />;
+      case 'Smile': return <Smile className="w-6 h-6 text-amber-400" />;
+      case 'RotateCw': return <RotateCw className="w-6 h-6 text-cyan-400" />;
+      case 'Code': return <Code className="w-6 h-6 text-purple-400" />;
+      case 'EyeOff': return <EyeOff className="w-6 h-6 text-rose-400" />;
+      default: return <ImageIcon className="w-6 h-6 text-indigo-400" />;
+    }
+  };
+
+  const filteredTools = IMAGE_TOOLS.filter((tool) => {
+    const matchesCategory = selectedCategory === 'all' || tool.category === selectedCategory;
+    const matchesSearch =
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.keywords.some((k) => k.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   const handleFileUpload = (file: UploadedFile) => {
     setUploadedFile(file);
@@ -140,142 +195,250 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col selection:bg-blue-600 selection:text-white">
-      {/* Top Navbar */}
+    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
+      {/* Top Navigation Header */}
       <Navbar onSelectPresetDoc={(doc, examName) => handleApplyPreset(doc, examName)} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
-        {/* Hero Banner */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-16">
+        {/* Hero Section */}
         <HeroSection
           onOpenPresetModal={() => setIsPresetModalOpen(true)}
           onQuickPresetSelect={handleQuickPresetSelect}
         />
 
-        {/* Main Processing Workspace Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Upload & Specifications (7 Cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Step 1: Upload Document */}
-            <div className="space-y-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-900 border border-blue-700 flex items-center justify-center text-xs text-white">1</span>
-                Upload Source File
-              </h2>
-              <DropzoneUpload
-                uploadedFile={uploadedFile}
-                onFileUpload={handleFileUpload}
-                onClearFile={handleClearFile}
-              />
+        {/* --- iLoveIMG Feature Tools Grid Section --- */}
+        <section className="space-y-8 pt-4">
+          <div className="text-center space-y-3 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>Complete iLoveIMG Feature Suite</span>
             </div>
-
-            {/* Step 2: Requirements & Specifications Form */}
-            <div className="space-y-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-900 border border-blue-700 flex items-center justify-center text-xs text-white">2</span>
-                Form Specifications
-              </h2>
-              <RequirementsForm
-                requirements={requirements}
-                onChange={(reqs) => setRequirements(reqs)}
-                onOpenManualCropper={() => setIsCropperOpen(true)}
-                presetNotice={presetNotice}
-              />
-            </div>
-
-            {/* Process Action Button */}
-            <button
-              onClick={handleProcessDocument}
-              disabled={!uploadedFile || isProcessing}
-              className={`w-full py-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-2.5 transition-all shadow-xl ${
-                !uploadedFile
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-800'
-                  : isProcessing
-                  ? 'bg-blue-700 text-white cursor-wait animate-pulse'
-                  : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white shadow-blue-600/30 transform hover:scale-[1.01]'
-              }`}
-            >
-              {isProcessing ? (
-                <>
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>Processing & Precision Compressing...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>Process & Format Document Now</span>
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-
-            {errorMsg && (
-              <div className="p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-300 text-xs flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column: Live Result & Preview (5 Cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-emerald-900 border border-emerald-700 flex items-center justify-center text-xs text-white">3</span>
-              Live Result & Verification
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              Every Tool You Need to <span className="gradient-text">Edit Images</span> Online
             </h2>
-
-            {processingResult && uploadedFile ? (
-              <div className="space-y-6 animate-fade-in">
-                {/* Result Comparison */}
-                <ImageComparisonPreview
-                  uploadedFile={uploadedFile}
-                  processingResult={processingResult}
-                  onOptimizeAgain={handleProcessDocument}
-                />
-
-                {/* Pre-Download Compliance Verification Checklist */}
-                <ValidationChecklist
-                  result={processingResult}
-                  requirements={requirements}
-                  onOptimizeAgain={handleProcessDocument}
-                />
-              </div>
-            ) : (
-              <div className="bg-gray-900/50 border border-gray-800 border-dashed rounded-2xl p-10 text-center text-gray-500 space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center mx-auto text-gray-400">
-                  <SlidersHorizontal className="w-6 h-6" />
-                </div>
-                <h4 className="font-bold text-gray-300 text-sm">Preview Will Appear Here</h4>
-                <p className="text-xs text-gray-500 max-w-xs mx-auto">
-                  Upload your document on the left, adjust specifications, and click <strong>Process & Format Document Now</strong>.
-                </p>
-              </div>
-            )}
+            <p className="text-sm text-slate-400 leading-relaxed">
+              100% free, browser-based image editor and converter suite. Modify photos instantly with zero server uploads and zero quality loss.
+            </p>
           </div>
-        </div>
 
-        {/* Local History Section */}
+          {/* Filter Bar & Search Input */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-[#0d121e] border border-white/10 p-3 rounded-2xl shadow-xl">
+            {/* Category Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+              {TOOL_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                    selectedCategory === cat.id
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                      : 'bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Instant Search Bar */}
+            <div className="relative w-full md:w-72">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tools (crop, bg, watermark...)"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Tools Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredTools.map((tool) => (
+              <Link
+                key={tool.id}
+                href={tool.route}
+                className="group relative bg-[#0d121e] hover:bg-[#121827] border border-white/10 hover:border-indigo-500/50 p-5 rounded-3xl transition-all duration-300 shadow-xl hover:shadow-2xl flex flex-col justify-between"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                      {getToolIcon(tool.iconName)}
+                    </div>
+                    {tool.badge && (
+                      <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+                        {tool.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-white text-base group-hover:text-indigo-400 transition-colors flex items-center gap-1.5">
+                      <span>{tool.name}</span>
+                      <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                      {tool.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500">
+                  <span className="capitalize font-semibold text-slate-400">{tool.category}</span>
+                  <span className="text-indigo-400 font-bold group-hover:underline">Open Tool →</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* --- Exam & Student Form Specification Resizer Workspace --- */}
+        <section className="space-y-8 pt-8 border-t border-white/10">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Exam Photo & Document Specification Workspace
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400">
+              Format passport photos & signatures to exact KB limits and pixel dimensions for SSC, UPSC, IBPS, RRB, CTET forms.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Upload & Specifications (7 Cols) */}
+            <div className="lg:col-span-7 space-y-8">
+              {/* Step 1: Upload Source Document */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs text-indigo-300 font-mono font-bold shadow-sm">
+                      1
+                    </span>
+                    <span>Upload Source Document File</span>
+                  </h2>
+                  {uploadedFile && (
+                    <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> File Selected
+                    </span>
+                  )}
+                </div>
+                <DropzoneUpload
+                  uploadedFile={uploadedFile}
+                  onFileUpload={handleFileUpload}
+                  onClearFile={handleClearFile}
+                />
+              </div>
+
+              {/* Step 2: Form Specifications */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xs text-indigo-300 font-mono font-bold shadow-sm">
+                      2
+                    </span>
+                    <span>Form Specifications & Exam Requirements</span>
+                  </h2>
+                </div>
+                <RequirementsForm
+                  requirements={requirements}
+                  onChange={(reqs) => setRequirements(reqs)}
+                  onOpenManualCropper={() => setIsCropperOpen(true)}
+                  presetNotice={presetNotice}
+                />
+              </div>
+
+              {/* Process Action CTA Button */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-500 rounded-3xl blur-md opacity-70 group-hover:opacity-100 transition duration-300 pointer-events-none" />
+                <button
+                  onClick={handleProcessDocument}
+                  disabled={!uploadedFile || isProcessing}
+                  className={`relative w-full py-4 sm:py-5 rounded-3xl font-black text-base flex items-center justify-center gap-3 transition-all shadow-2xl ${
+                    !uploadedFile
+                      ? 'bg-[#0d121e] text-slate-500 cursor-not-allowed border border-white/10 opacity-70'
+                      : isProcessing
+                      ? 'bg-indigo-700 text-white cursor-wait animate-pulse'
+                      : 'bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      <span>Processing Canvas & Compress Engine...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 text-amber-300" />
+                      <span>Process & Format Document Now</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {errorMsg && (
+                <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-300 text-xs flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Live Output & Verification (5 Cols) */}
+            <div className="lg:col-span-5 space-y-6">
+              <h2 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-xs text-emerald-300 font-mono font-bold shadow-sm">
+                  3
+                </span>
+                <span>Live Verification & Download</span>
+              </h2>
+
+              {processingResult && uploadedFile ? (
+                <div className="space-y-6 animate-fade-in">
+                  <ImageComparisonPreview
+                    uploadedFile={uploadedFile}
+                    processingResult={processingResult}
+                    onOptimizeAgain={handleProcessDocument}
+                  />
+                  <ValidationChecklist
+                    result={processingResult}
+                    requirements={requirements}
+                    onOptimizeAgain={handleProcessDocument}
+                  />
+                </div>
+              ) : (
+                <div className="bg-[#0d121e] border border-white/10 border-dashed rounded-3xl p-10 text-center text-slate-400 space-y-4 shadow-xl backdrop-blur-2xl">
+                  <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto text-indigo-400 shadow-inner">
+                    <SlidersHorizontal className="w-7 h-7" />
+                  </div>
+                  <h4 className="font-extrabold text-white text-base">Live Preview Will Appear Here</h4>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+                    Upload your document on the left, adjust specifications or pick an exam preset, and click <strong className="text-indigo-400">Process & Format Document Now</strong>.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Local History Drawer */}
         <RecentDocuments />
 
         {/* Educational SEO & FAQ Section */}
         <SeoContentSection
-          title="Student Guide: Resizing Photos & Documents for Government Forms"
-          description="Filing online application forms for SSC CGL, UPSC, IBPS, RRB Railway, CTET, or state competitive exams requires strict adherence to photo size, pixel dimensions, and JPG format limits. FitMyForm is a 100% free, browser-based tool built specifically for Indian students to format documents securely without third-party server uploads."
+          title="Complete Image Editing & Exam Document Formatting Guide"
+          description="FitMyForm is an all-in-one free web application providing all features of iLoveIMG alongside specialized exam document resizers. Compress images to KB limits, crop photos visually, convert formats (PNG, WEBP, JPG), upscale low resolution photos, watermark sensitive documents, remove backgrounds, generate memes, and blur faces with 100% browser privacy."
           faqs={[
             {
-              question: 'Is it safe to upload sensitive documents like Aadhaar card, photo, and signature on FitMyForm?',
-              answer: 'Yes, 100% safe. FitMyForm processes all images and PDFs entirely inside your web browser using client-side JavaScript HTML5 Canvas and Blob APIs. Your files are never sent or stored on any server.'
+              question: 'Are all iLoveIMG features completely free on FitMyForm?',
+              answer: 'Yes, 100% free with unlimited usage. You can compress, resize, crop, rotate, watermark, upscale, remove background, generate memes, convert formats, and edit photos without paying or registering.'
             },
             {
-              question: 'How do I resize a passport photo to 200 x 230 pixels and 20–50 KB for SSC?',
-              answer: 'Simply click "SSC Passport Photo" preset or select Width: 200 px, Height: 230 px, Min KB: 20, Max KB: 50, Format: JPG. Upload your photo and click Process. FitMyForm will iteratively adjust quality to ensure your file falls exactly within 20 to 50 KB.'
+              question: 'Are my images uploaded to external servers?',
+              answer: 'No! All processing happens directly inside your web browser using HTML5 Canvas APIs. Your files never leave your computer or phone.'
             },
             {
-              question: 'Why does my signature image get rejected on online portals?',
-              answer: 'Online portals reject signatures if they exceed KB limits (usually max 20 KB), have wrong aspect ratio (standard is 140x60 px), or contain colored background clutter. FitMyForm automatically trims borders and pads white background.'
-            },
-            {
-              question: 'Does FitMyForm work on mobile phones?',
-              answer: 'Yes! FitMyForm works on all Android and iOS smartphones. You can take a photo directly from your camera or select an image from gallery.'
+              question: 'How do I resize a passport photo to 200 x 230 px and 20–50 KB for SSC exams?',
+              answer: 'Use the SSC Passport Photo preset or select Width: 200 px, Height: 230 px, Min size: 20 KB, Max size: 50 KB, Format: JPG. Click Process & Format Document Now for an instant result.'
             }
           ]}
         />

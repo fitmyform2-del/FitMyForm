@@ -1,76 +1,97 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Heart, FileText, CheckCircle2 } from 'lucide-react';
+import { FileCheck, ShieldCheck, Heart, Sparkles } from 'lucide-react';
+import { IMAGE_TOOLS } from '@/config/imageToolsConfig';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-gray-950 border-t border-gray-800/80 text-gray-400 py-12 px-4 sm:px-6 lg:px-8 mt-20">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-        {/* Brand & Privacy */}
-        <div className="space-y-4 md:col-span-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-              F
+    <footer className="w-full bg-[#05070c] border-t border-white/10 text-slate-400 py-12 px-4 sm:px-6 lg:px-8 mt-16">
+      <div className="max-w-7xl mx-auto space-y-12">
+        {/* Main Footer Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          {/* Brand Col */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                <FileCheck className="w-5 h-5" />
+              </div>
+              <span className="font-extrabold text-xl tracking-tight text-white font-sans">
+                FitMy<span className="gradient-text font-black">Form</span>
+              </span>
+            </Link>
+            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+              The fastest 100% free client-side web application for image modification and student document formatting. Compress, resize, crop, convert, watermark, upscale, and edit photos securely in your web browser.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full w-fit">
+              <ShieldCheck className="w-4 h-4" />
+              <span>100% Client-Side Privacy Guaranteed</span>
             </div>
-            <span className="font-extrabold text-lg text-white">FitMyForm</span>
           </div>
-          <p className="text-xs leading-relaxed text-gray-400">
-            Free student document resizer & formatter. Tailored for Indian government competitive exams, college admissions, and job forms.
+
+          {/* Image Tools Col */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Image Tools</span>
+            </h4>
+            <ul className="space-y-2 text-xs">
+              {IMAGE_TOOLS.slice(0, 7).map((tool) => (
+                <li key={tool.id}>
+                  <Link href={tool.route} className="hover:text-white transition-colors">
+                    {tool.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* More Image Tools Col */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white">More Image Tools</h4>
+            <ul className="space-y-2 text-xs">
+              {IMAGE_TOOLS.slice(7).map((tool) => (
+                <li key={tool.id}>
+                  <Link href={tool.route} className="hover:text-white transition-colors">
+                    {tool.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Exam Presets & PDF Suite */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white">Exam Resizers</h4>
+            <ul className="space-y-2 text-xs">
+              <li><Link href="/ssc-photo-resizer" className="hover:text-white transition-colors">SSC Photo Resizer 20-50 KB</Link></li>
+              <li><Link href="/signature-resizer" className="hover:text-white transition-colors">Signature Resizer 140x60</Link></li>
+              <li><Link href="/ctet-photo-resizer" className="hover:text-white transition-colors">CTET Photo Resizer</Link></li>
+              <li><Link href="/uptet-photo-resizer" className="hover:text-white transition-colors">UPTET Photo Resizer</Link></li>
+              <li><Link href="/pdf-compressor" className="hover:text-white transition-colors">PDF Compressor to KB</Link></li>
+              <li><Link href="/pdf-tools" className="hover:text-white transition-colors">Client PDF Tools Hub</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* SEO Keyword Tags Strip */}
+        <div className="pt-8 border-t border-white/10 space-y-3">
+          <div className="text-[10px] font-black uppercase text-indigo-400 tracking-wider">Top Search Keywords</div>
+          <div className="flex flex-wrap gap-1.5 text-[11px] text-slate-500 leading-normal">
+            <span>free online image compressor</span> • <span>reduce image size in kb</span> • <span>crop image online free</span> •
+            <span>convert png to jpg</span> • <span>webp to jpg online</span> • <span>remove background transparent png</span> •
+            <span>upscale image 4k online</span> • <span>free meme generator</span> • <span>rotate photo 90 degrees</span> •
+            <span>watermark image online</span> • <span>blur face photo</span> • <span>online photo editor free</span> •
+            <span>ssc photo resizer 20-50 kb</span> • <span>signature resizer 140x60</span> • <span>upsc passport photo builder</span>
+          </div>
+        </div>
+
+        {/* Bottom copyright */}
+        <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>© {new Date().getFullYear()} FitMyForm & iLoveIMG Suite. Built for students & creators worldwide.</p>
+          <p className="flex items-center gap-1">
+            Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> for 100% Privacy & Fast Latency.
           </p>
-          <div className="flex items-start gap-2 bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-3 text-emerald-300 text-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-            <span>
-              <strong>100% Client-Side Privacy:</strong> Your sensitive Aadhaar cards, photos, and signatures never leave your device.
-            </span>
-          </div>
         </div>
-
-        {/* Popular Resizer Tools */}
-        <div>
-          <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-blue-400" />
-            Quick Resizer Tools
-          </h4>
-          <ul className="space-y-2 text-xs">
-            <li><Link href="/photo-resizer" className="hover:text-blue-400 transition-colors">Passport Photo Resizer</Link></li>
-            <li><Link href="/signature-resizer" className="hover:text-blue-400 transition-colors">Signature Resizer & Formatter</Link></li>
-            <li><Link href="/image-compressor" className="hover:text-blue-400 transition-colors">Compress Image to 20 KB - 50 KB</Link></li>
-            <li><Link href="/image-to-jpg" className="hover:text-blue-400 transition-colors">Convert PNG / WEBP to JPG</Link></li>
-            <li><Link href="/pdf-compressor" className="hover:text-blue-400 transition-colors">Client-Side PDF Size Reducer</Link></li>
-          </ul>
-        </div>
-
-        {/* Exam Specific Presets */}
-        <div>
-          <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-emerald-400" />
-            Exam Photo Formats
-          </h4>
-          <ul className="space-y-2 text-xs">
-            <li><Link href="/ssc-photo-resizer" className="hover:text-emerald-400 transition-colors">SSC CGL / CHSL Photo Resizer (200x230)</Link></li>
-            <li><Link href="/uptet-photo-resizer" className="hover:text-emerald-400 transition-colors">UPTET Photo & Signature Maker</Link></li>
-            <li><Link href="/ctet-photo-resizer" className="hover:text-emerald-400 transition-colors">CTET Photo Resizer (10-100 KB)</Link></li>
-            <li><Link href="/presets" className="hover:text-emerald-400 transition-colors">UPSC Photo & Signature (350x350)</Link></li>
-            <li><Link href="/presets" className="hover:text-emerald-400 transition-colors">IBPS Bank Photo & Thumb Impression</Link></li>
-          </ul>
-        </div>
-
-        {/* Informational Guides */}
-        <div>
-          <h4 className="font-semibold text-white text-sm mb-3">Guidelines & Help</h4>
-          <ul className="space-y-2 text-xs">
-            <li><Link href="/resize-photo-for-online-form" className="hover:text-indigo-400 transition-colors">How to Resize Photos for Online Forms</Link></li>
-            <li><Link href="/presets" className="hover:text-indigo-400 transition-colors">View All Exam Requirements Database</Link></li>
-            <li><Link href="/dashboard" className="hover:text-indigo-400 transition-colors">My Recent Processed Files</Link></li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto pt-6 border-t border-gray-800/60 text-center text-xs text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p>© {new Date().getFullYear()} FitMyForm. Built for Indian Students & Applicants.</p>
-        <p className="flex items-center gap-1 justify-center">
-          Crafted with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> for fast & error-free form submissions.
-        </p>
       </div>
     </footer>
   );
