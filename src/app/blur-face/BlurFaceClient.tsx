@@ -7,7 +7,7 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { blurRegionsCanvas, BlurBox } from '@/lib/image/editorTools';
-import { EyeOff, Download, RefreshCw, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { EyeOff, Download, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 
 export default function BlurFaceClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -15,58 +15,24 @@ export default function BlurFaceClient() {
     { x: 50, y: 50, width: 150, height: 150, type: 'pixelate', intensity: 12 }
   ]);
   const [blurredResultUrl, setBlurredResultUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
-    setBlurredResultUrl(null);
-  };
-
-  const addBlurBox = () => {
-    setBoxes([...boxes, { x: 80 + boxes.length * 20, y: 80 + boxes.length * 20, width: 140, height: 140, type: 'pixelate', intensity: 12 }]);
-  };
-
-  const removeBlurBox = (idx: number) => {
-    setBoxes(boxes.filter((_, i) => i !== idx));
-  };
-
-  const processBlur = async () => {
-    if (!uploadedFile) return;
-    setIsProcessing(true);
-
-    try {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = uploadedFile.previewUrl;
-      });
-
-      const canvas = blurRegionsCanvas(img, boxes);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          if (blurredResultUrl) URL.revokeObjectURL(blurredResultUrl);
-          setBlurredResultUrl(URL.createObjectURL(blob));
-        }
-        setIsProcessing(false);
-      }, uploadedFile.file.type || 'image/jpeg', 0.95);
-    } catch (e) {
-      console.error(e);
-      setIsProcessing(false);
-    }
-  };
 
   useEffect(() => {
     let active = true;
     if (uploadedFile) {
-      setTimeout(() => {
-        if (active) processBlur();
-      }, 0);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = blurRegionsCanvas(img, boxes);
+        canvas.toBlob((blob) => {
+          if (blob && active) {
+            if (blurredResultUrl) URL.revokeObjectURL(blurredResultUrl);
+            setBlurredResultUrl(URL.createObjectURL(blob));
+          }
+        }, uploadedFile.file.type || 'image/jpeg', 0.95);
+      };
+      img.src = uploadedFile.previewUrl;
     }
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [uploadedFile, boxes]);
 
   return (
@@ -90,12 +56,15 @@ export default function BlurFaceClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 space-y-6">
             {!uploadedFile ? (
-              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={handleFileUpload} onClearFile={() => setUploadedFile(null)} />
+              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={(f) => { setUploadedFile(f); setBlurredResultUrl(null); }} onClearFile={() => setUploadedFile(null)} />
             ) : (
               <div className="space-y-6 bg-[#0d121e] border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="font-extrabold text-white text-sm">Blur Region Box Configurations</h3>
-                  <button onClick={addBlurBox} className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1">
+                  <button
+                    onClick={() => setBoxes([...boxes, { x: 80 + boxes.length * 20, y: 80 + boxes.length * 20, width: 140, height: 140, type: 'pixelate', intensity: 12 }])}
+                    className="px-3 py-2 min-h-[44px] rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 cursor-pointer"
+                  >
                     <Plus className="w-4 h-4" /> Add Blur Box
                   </button>
                 </div>
@@ -106,7 +75,10 @@ export default function BlurFaceClient() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-indigo-400">Blur Zone #{idx + 1}</span>
                         {boxes.length > 1 && (
-                          <button onClick={() => removeBlurBox(idx)} className="text-xs text-rose-400 hover:underline flex items-center gap-1 font-bold">
+                          <button
+                            onClick={() => setBoxes(boxes.filter((_, i) => i !== idx))}
+                            className="text-xs text-rose-400 hover:underline flex items-center gap-1 font-bold min-h-[44px] cursor-pointer"
+                          >
                             <Trash2 className="w-3.5 h-3.5" /> Remove
                           </button>
                         )}
@@ -122,7 +94,7 @@ export default function BlurFaceClient() {
                               newBoxes[idx].type = e.target.value as BlurBox['type'];
                               setBoxes(newBoxes);
                             }}
-                            className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white font-bold"
+                            className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-white font-bold"
                           >
                             <option value="pixelate">Pixelate Blocks</option>
                             <option value="gaussian">Gaussian Blur</option>
@@ -140,7 +112,7 @@ export default function BlurFaceClient() {
                               newBoxes[idx].intensity = Number(e.target.value);
                               setBoxes(newBoxes);
                             }}
-                            className="w-full accent-indigo-500"
+                            className="w-full min-h-[44px] accent-indigo-500"
                           />
                         </div>
                       </div>
@@ -157,7 +129,7 @@ export default function BlurFaceClient() {
                                 newBoxes[idx].x = Number(e.target.value);
                                 setBoxes(newBoxes);
                               }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
+                              className="w-full px-2 py-1.5 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
                             />
                             <input
                               type="number"
@@ -167,7 +139,7 @@ export default function BlurFaceClient() {
                                 newBoxes[idx].y = Number(e.target.value);
                                 setBoxes(newBoxes);
                               }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
+                              className="w-full px-2 py-1.5 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
                             />
                           </div>
                         </div>
@@ -183,7 +155,7 @@ export default function BlurFaceClient() {
                                 newBoxes[idx].width = Number(e.target.value);
                                 setBoxes(newBoxes);
                               }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
+                              className="w-full px-2 py-1.5 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
                             />
                             <input
                               type="number"
@@ -193,7 +165,7 @@ export default function BlurFaceClient() {
                                 newBoxes[idx].height = Number(e.target.value);
                                 setBoxes(newBoxes);
                               }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
+                              className="w-full px-2 py-1.5 min-h-[44px] rounded-lg bg-white/[0.04] border border-white/10 text-white font-mono"
                             />
                           </div>
                         </div>
@@ -220,7 +192,7 @@ export default function BlurFaceClient() {
                 <a
                   href={blurredResultUrl}
                   download={`censored-${uploadedFile?.name || 'photo.jpg'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Censored Photo</span>

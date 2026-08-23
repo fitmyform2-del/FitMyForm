@@ -7,6 +7,7 @@ import { Footer } from '@/components/footer/Footer';
 import { SignaturePadModal } from '@/components/pdf/SignaturePadModal';
 import { signPdfMultiField, SignField } from '@/lib/pdf/pdfTools';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
+import { SignFieldPalette } from './_components/SignFieldPalette';
 import {
   PenTool,
   Upload,
@@ -14,15 +15,7 @@ import {
   RefreshCw,
   ArrowLeft,
   CheckCircle2,
-  FileText,
-  Plus,
-  Trash2,
-  Calendar,
-  User,
-  Type,
-  CheckSquare,
-  ShieldCheck,
-  Award
+  FileText
 } from 'lucide-react';
 
 export default function SignPdfPage() {
@@ -114,7 +107,7 @@ export default function SignPdfPage() {
                 <input type="file" accept="application/pdf" onChange={handleFileChange} id="pdf-sign-input" className="hidden" />
                 <label
                   htmlFor="pdf-sign-input"
-                  className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-extrabold text-xs rounded-2xl cursor-pointer shadow-xl"
+                  className="inline-block px-6 py-3 min-h-[44px] bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-extrabold text-xs rounded-2xl cursor-pointer shadow-xl"
                 >
                   Choose PDF Document
                 </label>
@@ -131,156 +124,72 @@ export default function SignPdfPage() {
                   </div>
                   <button
                     onClick={() => setFile(null)}
-                    className="px-3 py-1.5 rounded-xl bg-white/[0.04] text-slate-400 hover:text-white text-xs font-bold border border-white/10"
+                    className="px-3 py-1.5 min-h-[44px] rounded-xl bg-white/[0.04] text-slate-400 hover:text-white text-xs font-bold border border-white/10 cursor-pointer"
                   >
                     Change File
                   </button>
                 </div>
 
-                {/* Signature Creator & Field Palette */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-300">My Saved Signature</span>
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md"
-                    >
-                      <PenTool className="w-3.5 h-3.5" />
-                      {activeSignatureUrl ? 'Change Signature' : 'Create Signature'}
-                    </button>
-                  </div>
+                <SignFieldPalette
+                  activeSignatureUrl={activeSignatureUrl}
+                  fields={fields}
+                  appendAuditTrail={appendAuditTrail}
+                  onOpenModal={() => setIsModalOpen(true)}
+                  onAddField={addField}
+                  onRemoveField={removeField}
+                  onUpdateField={updateFieldPos}
+                  onAuditTrailChange={setAppendAuditTrail}
+                />
 
-                  {activeSignatureUrl ? (
-                    <div className="bg-white p-3 rounded-2xl flex items-center justify-center h-20 border border-white/20">
-                      <img src={activeSignatureUrl} alt="Signature Preview" className="max-h-full object-contain" />
-                    </div>
-                  ) : (
-                    <div className="p-4 border-2 border-dashed border-white/10 rounded-2xl text-center text-xs text-slate-500">
-                      Click &quot;Create Signature&quot; to draw, type calligraphy name, or upload signature PNG image.
-                    </div>
-                  )}
-
-                  {/* Add Field Buttons Toolbar */}
-                  <div className="space-y-2 pt-2">
-                    <label className="text-xs font-bold text-slate-300 block">Add e-Sign Fields to PDF:</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <button
-                        onClick={() => addField('signature', activeSignatureUrl || undefined)}
-                        className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-                      >
-                        <PenTool className="w-3.5 h-3.5 text-indigo-400" /> Signature
-                      </button>
-                      <button
-                        onClick={() => addField('name', 'John Doe')}
-                        className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-                      >
-                        <User className="w-3.5 h-3.5 text-cyan-400" /> Full Name
-                      </button>
-                      <button
-                        onClick={() => addField('date', new Date().toISOString().split('T')[0])}
-                        className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-                      >
-                        <Calendar className="w-3.5 h-3.5 text-emerald-400" /> Date Signed
-                      </button>
-                      <button
-                        onClick={() => addField('checkbox')}
-                        className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5"
-                      >
-                        <CheckSquare className="w-3.5 h-3.5 text-amber-400" /> Checkbox
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Added Fields Manager List */}
-                {fields.length > 0 && (
-                  <div className="space-y-3 pt-4 border-t border-white/10">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-emerald-400 font-mono">Placed Fields ({fields.length})</span>
-                    </div>
-
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {fields.map((f, idx) => (
-                        <div key={f.id} className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 flex items-center justify-between text-xs gap-3">
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-lg bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold flex items-center justify-center">
-                              {idx + 1}
-                            </span>
-                            <span className="font-bold text-white capitalize">{f.type}</span>
-                            <span className="text-slate-400 font-mono text-[10px]">Page {f.pageIndex + 1}</span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={f.value || ''}
-                              onChange={(e) => updateFieldPos(f.id, 'value', e.target.value)}
-                              placeholder="Value..."
-                              className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-white font-bold text-xs w-32 focus:outline-none"
-                            />
-                            <button
-                              onClick={() => removeField(f.id)}
-                              className="p-1 text-rose-400 hover:bg-rose-500/20 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Audit Trail Option */}
-                <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
-                  <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                    <div>
-                      <h5 className="text-xs font-bold text-white">Append e-Sign Audit Trail Certificate</h5>
-                      <p className="text-[11px] text-slate-400">Adds UTC timestamp, document hash, and legal verification seal.</p>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={appendAuditTrail}
-                    onChange={(e) => setAppendAuditTrail(e.target.checked)}
-                    className="w-5 h-5 accent-emerald-500 cursor-pointer"
-                  />
-                </div>
-
-                {/* Process Button */}
                 <button
                   onClick={handleApplySignature}
-                  disabled={isProcessing}
-                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-black text-sm rounded-2xl shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isProcessing || fields.length === 0}
+                  className={`w-full py-4 min-h-[48px] rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl ${
+                    fields.length === 0
+                      ? 'bg-white/5 text-slate-500 border border-white/10 cursor-not-allowed'
+                      : isProcessing
+                      ? 'bg-indigo-700 text-white cursor-wait animate-pulse'
+                      : 'bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white cursor-pointer'
+                  }`}
                 >
-                  {isProcessing ? <RefreshCw className="w-5 h-5 animate-spin" /> : <PenTool className="w-5 h-5" />}
-                  <span>Stamp e-Signatures & Generate PDF</span>
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Embedding Signatures & Generating Audit Certificate...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PenTool className="w-4 h-4" />
+                      <span>Sign PDF & Generate Certificate</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}
           </div>
 
-          {/* Right Column: PDF Download & Preview (5 Cols) */}
+          {/* Right Column: Output & Download (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             <h2 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Signed PDF Output</span>
+              <span>Signed PDF Document Result</span>
             </h2>
 
             {signedUrl ? (
-              <div className="bg-[#0d121e] border border-emerald-500/30 rounded-3xl p-6 text-center space-y-6 shadow-2xl backdrop-blur-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto text-emerald-400">
-                  <Award className="w-8 h-8" />
+              <div className="bg-[#0d121e] border border-emerald-500/30 rounded-3xl p-6 space-y-6 shadow-2xl backdrop-blur-2xl animate-fade-in">
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-2">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> PDF e-Signed Successfully!
+                  </h4>
+                  <p className="text-xs text-slate-300">
+                    Audit trail certificate attached to final PDF document page. 100% Client-Side Cryptographic execution.
+                  </p>
                 </div>
-                <div className="space-y-1">
-                  <h4 className="font-extrabold text-white text-base">Legally Binding Signed PDF Ready!</h4>
-                  <p className="text-xs text-slate-400">Your PDF includes embedded signatures and audit trail certificate.</p>
-                </div>
+
                 <a
                   href={signedUrl}
-                  download={`signed_${file?.name || 'document.pdf'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  download={`signed-${file?.name || 'document.pdf'}`}
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Signed PDF</span>
@@ -289,24 +198,20 @@ export default function SignPdfPage() {
             ) : (
               <div className="bg-[#0d121e] border border-white/10 border-dashed rounded-3xl p-10 text-center text-slate-400 space-y-3">
                 <PenTool className="w-8 h-8 text-indigo-400 mx-auto" />
-                <h4 className="font-extrabold text-white text-base">e-Sign Preview</h4>
-                <p className="text-xs text-slate-400">Upload your PDF contract on the left, add signature fields, and click Stamp e-Signatures.</p>
+                <h4 className="font-extrabold text-white text-base">No Signed PDF Generated Yet</h4>
+                <p className="text-xs text-slate-400">Upload PDF, place signature and text fields, then click &quot;Sign PDF & Generate Certificate&quot;.</p>
               </div>
             )}
           </div>
         </div>
 
         <SeoContentSection
-          title="Legally Binding Electronic Signatures with 100% Client-Side Privacy"
-          description="FitMyForm's iLoveSign PDF e-Sign suite allows businesses, real estate agents, legal teams, and individuals to e-sign agreements securely inside browser RAM. Electronic signatures comply with EU eIDAS, US ESIGN Act, and Indian IT Act 2000."
+          title="iLoveSign Client-Side Free PDF e-Signature Tool"
+          description="Sign PDF contracts, agreements, NDAs, and forms with full eIDAS & ESIGN Act compliance directly in your browser. Generate cryptographic audit trail certificates without server uploads."
           faqs={[
             {
-              question: 'Are e-signatures legally binding on FitMyForm?',
-              answer: 'Yes. Electronic signatures created with FitMyForm meet Simple Electronic Signature (SES) standards under eIDAS (EU), ESIGN Act (US), and Information Technology Act 2000 (India).'
-            },
-            {
-              question: 'Are my confidential contracts uploaded to any cloud server?',
-              answer: 'No! All PDF modifications and signature embeddings are executed 100% locally inside your web browser using HTML5 Canvas and JavaScript WebAssembly.'
+              question: 'Are my signatures stored on a server?',
+              answer: 'No! All signature embedding and PDF re-encoding are executed locally inside your web browser memory.'
             }
           ]}
         />
@@ -314,11 +219,17 @@ export default function SignPdfPage() {
 
       <Footer />
 
-      <SignaturePadModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSaveSignature={(dataUrl) => setActiveSignatureUrl(dataUrl)}
-      />
+      {/* Signature Draw / Type / Upload Modal */}
+      {isModalOpen && (
+        <SignaturePadModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSaveSignature={(dataUrl) => {
+            setActiveSignatureUrl(dataUrl);
+            setIsModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

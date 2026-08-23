@@ -15,7 +15,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   onCapture
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
@@ -27,7 +26,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Stop existing stream if any
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -35,11 +33,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
     try {
       const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
+        video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false
       };
 
@@ -51,7 +45,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         await videoRef.current.play();
       }
     } catch (err: unknown) {
-      console.error('Camera access error:', err);
       const error = err as { name?: string };
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setErrorMsg('Camera permission denied. Please allow camera access in your browser settings.');
@@ -80,10 +73,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     };
   }, [isOpen, capturedUrl, startCamera]);
 
-  const handleToggleCamera = () => {
-    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
-  };
-
   const handleTakePhoto = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -95,39 +84,27 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Flip horizontally if front camera for natural mirror effect
     if (facingMode === 'user') {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
     const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
     setCapturedUrl(dataUrl);
 
-    // Stop video stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   };
 
-  const handleRetake = () => {
-    setCapturedUrl(null);
-    startCamera();
-  };
-
   const handleConfirmPhoto = () => {
     if (!capturedUrl) return;
-
-    // Convert dataURL to File
     fetch(capturedUrl)
       .then((res) => res.blob())
       .then((blob) => {
-        const file = new File([blob], `camera_photo_${Date.now()}.jpg`, {
-          type: 'image/jpeg'
-        });
+        const file = new File([blob], `camera_photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
         onCapture(file, capturedUrl);
         onClose();
       });
@@ -151,18 +128,16 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           </div>
           <button
             onClick={() => {
-              if (streamRef.current) {
-                streamRef.current.getTracks().forEach((t) => t.stop());
-              }
+              if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
               onClose();
             }}
-            className="p-2 text-gray-400 hover:text-white rounded-xl hover:bg-gray-800 transition-colors"
+            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-white rounded-xl hover:bg-gray-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Camera View / Captured Image Area */}
+        {/* Camera Stream Area */}
         <div className="relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
           {errorMsg ? (
             <div className="p-6 text-center text-red-300 space-y-3">
@@ -170,16 +145,14 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               <p className="text-xs font-semibold">{errorMsg}</p>
               <button
                 onClick={startCamera}
-                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-bold"
+                className="px-4 py-2.5 min-h-[44px] bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-bold cursor-pointer"
               >
                 Try Again
               </button>
             </div>
           ) : capturedUrl ? (
-            /* Snapshot Preview */
             <img src={capturedUrl} alt="Captured Snapshot" className="w-full h-full object-cover" />
           ) : (
-            /* Live Camera Stream with Frame Overlay */
             <>
               <video
                 ref={videoRef}
@@ -187,10 +160,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 muted
                 className={`w-full h-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
               />
-
-              {/* Passport Photo / Signature Framing Oval & Grid Overlay */}
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                {/* Face Guide Oval */}
                 <div className="w-48 h-60 border-2 border-dashed border-blue-400/80 rounded-[50%] shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] flex items-center justify-center">
                   <span className="text-[11px] font-semibold text-blue-200 bg-blue-950/80 px-2 py-0.5 rounded-full border border-blue-500/40">
                     Center Face Here
@@ -213,9 +183,8 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           {!capturedUrl ? (
             <>
               <button
-                onClick={handleToggleCamera}
-                className="p-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                title="Switch Camera"
+                onClick={() => setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'))}
+                className="p-3 min-h-[44px] bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <SwitchCamera className="w-5 h-5 text-indigo-400" />
                 <span className="hidden sm:inline">Flip Camera</span>
@@ -224,7 +193,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               <button
                 onClick={handleTakePhoto}
                 disabled={isLoading || !!errorMsg}
-                className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm rounded-2xl flex items-center gap-2 shadow-xl shadow-blue-600/30 transform active:scale-95 transition-all"
+                className="px-8 py-3.5 min-h-[48px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm rounded-2xl flex items-center gap-2 shadow-xl shadow-blue-600/30 cursor-pointer"
               >
                 <Camera className="w-5 h-5 text-amber-300" />
                 <span>Snap Photo</span>
@@ -235,8 +204,8 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           ) : (
             <div className="w-full flex items-center justify-between gap-3">
               <button
-                onClick={handleRetake}
-                className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                onClick={() => { setCapturedUrl(null); startCamera(); }}
+                className="px-4 py-2.5 min-h-[44px] bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4 text-amber-400" />
                 <span>Retake Photo</span>
@@ -244,10 +213,10 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
               <button
                 onClick={handleConfirmPhoto}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+                className="px-6 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
               >
                 <Check className="w-4 h-4" />
-                <span>Use Photo → Next Step (Crop/Resize)</span>
+                <span>Use Photo → Next Step</span>
               </button>
             </div>
           )}

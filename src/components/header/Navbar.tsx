@@ -6,37 +6,14 @@ import {
   FileCheck,
   Search,
   ChevronDown,
-  Sparkles,
-  Minimize2,
-  Maximize2,
-  Crop,
-  FileImage,
-  Repeat,
-  Wand2,
-  Eraser,
-  Shield,
-  Smile,
-  RotateCw,
-  Code,
-  EyeOff,
   Layers,
-  Clock,
-  FileStack,
-  Image as ImageIcon,
-  PenTool,
-  Award,
-  ShieldCheck,
-  Scale,
-  Umbrella,
-  Building2,
-  Landmark,
-  Users,
-  BarChart3
+  FileStack
 } from 'lucide-react';
 import { PresetSelectorModal } from '../presets/PresetSelectorModal';
 import { PDF_TOOLS } from '@/config/pdfToolsConfig';
-import { IMAGE_TOOLS } from '@/config/imageToolsConfig';
 import { SingleDocSpec } from '@/types/presets';
+import { SignDropdownMenu } from './_components/SignDropdownMenu';
+import { ImageToolsDropdownMenu } from './_components/ImageToolsDropdownMenu';
 
 interface NavbarProps {
   onSelectPresetDoc?: (doc: SingleDocSpec, examName: string) => void;
@@ -59,193 +36,62 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const getToolIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Minimize2': return <Minimize2 className="w-4 h-4 text-emerald-400" />;
-      case 'Maximize2': return <Maximize2 className="w-4 h-4 text-cyan-400" />;
-      case 'Crop': return <Crop className="w-4 h-4 text-indigo-400" />;
-      case 'FileImage': return <FileImage className="w-4 h-4 text-amber-400" />;
-      case 'Repeat': return <Repeat className="w-4 h-4 text-cyan-400" />;
-      case 'Wand2': return <Wand2 className="w-4 h-4 text-pink-400" />;
-      case 'Sparkles': return <Sparkles className="w-4 h-4 text-emerald-400" />;
-      case 'Eraser': return <Eraser className="w-4 h-4 text-indigo-400" />;
-      case 'Shield': return <Shield className="w-4 h-4 text-blue-400" />;
-      case 'Smile': return <Smile className="w-4 h-4 text-amber-400" />;
-      case 'RotateCw': return <RotateCw className="w-4 h-4 text-cyan-400" />;
-      case 'Code': return <Code className="w-4 h-4 text-purple-400" />;
-      case 'EyeOff': return <EyeOff className="w-4 h-4 text-rose-400" />;
-      default: return <ImageIcon className="w-4 h-4 text-indigo-400" />;
-    }
-  };
-
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#080b11]/85 backdrop-blur-2xl border-b border-white/10 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-50 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-400 rounded-xl blur-sm opacity-70 group-hover:opacity-100 transition duration-300" />
-              <div className="relative w-10 h-10 rounded-xl bg-[#0d121e] border border-white/15 flex items-center justify-center shadow-inner">
-                <FileCheck className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
-              </div>
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+              <FileCheck className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight text-white flex items-center gap-1.5 font-sans">
-                FitMy<span className="gradient-text font-black">Form</span>
+            <div className="flex flex-col -gap-0.5">
+              <span className="font-bold text-lg tracking-tight text-slate-50 flex items-center gap-1 font-sans">
+                FitMy<span className="text-indigo-400">Form</span>
               </span>
-              <span className="block text-[10px] text-indigo-300/80 -mt-1 font-semibold tracking-wider uppercase">
-                iLoveIMG & iLoveSign Suite
+              <span className="text-[9px] text-slate-400 font-medium tracking-widest uppercase">
+                Tool Suite
               </span>
             </div>
           </Link>
 
-          {/* Quick Exam Preset Search */}
-          <button
-            onClick={() => setIsPresetModalOpen(true)}
-            className="hidden lg:flex items-center gap-3 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white px-4 py-2 rounded-full text-xs font-medium border border-white/10 hover:border-indigo-500/40 transition-all shadow-inner group"
-          >
-            <Search className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
-            <span className="text-slate-300">Search Exam Presets (SSC, UPSC, IBPS, CTET...)</span>
-            <kbd className="bg-white/10 text-indigo-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-white/10 shadow-sm">⌘K</kbd>
-          </button>
+          {/* Quick Exam Preset Search (Central Search Bar) */}
+          <div className="hidden lg:flex flex-1 max-w-xl mx-auto">
+            <button
+              onClick={() => setIsPresetModalOpen(true)}
+              className="w-full flex items-center gap-3 bg-slate-900/50 hover:bg-slate-800 text-slate-400 hover:text-slate-200 px-4 py-2 rounded-xl text-sm border border-slate-700/50 hover:border-slate-600 transition-all shadow-inner"
+            >
+              <Search className="w-4 h-4" />
+              <span>Search exams (SSC, UPSC, IBPS...)</span>
+              <div className="ml-auto flex items-center gap-1">
+                <kbd className="bg-slate-800 text-slate-300 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded border border-slate-700 shadow-sm">⌘K</kbd>
+              </div>
+            </button>
+          </div>
 
           {/* Navigation Links */}
-          <nav className="flex items-center gap-1.5 sm:gap-2">
+          <nav className="flex items-center gap-2 sm:gap-3">
             {/* iLoveSign Suite Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setIsSignMenuOpen(!isSignMenuOpen);
-                  setIsImageToolsMenuOpen(false);
-                  setIsPdfMenuOpen(false);
-                }}
-                onBlur={() => setTimeout(() => setIsSignMenuOpen(false), 250)}
-                className="flex items-center gap-1.5 text-xs font-extrabold px-3.5 py-2 rounded-xl text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all shadow-sm cursor-pointer"
-              >
-                <PenTool className="w-4 h-4 text-emerald-400" />
-                <span>iLoveSign</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSignMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isSignMenuOpen && (
-                <div className="absolute top-full right-0 lg:left-0 lg:right-auto mt-2 w-[340px] bg-[#0d121e] border border-white/15 rounded-2xl shadow-2xl p-3 z-50 divide-y divide-white/10 backdrop-blur-2xl animate-fade-in">
-                  <div className="px-3 py-2 text-[10px] font-black uppercase text-emerald-400 tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <PenTool className="w-3.5 h-3.5 text-emerald-400" />
-                      iLoveSign e-Sign Suite
-                    </span>
-                    <span className="text-slate-400 font-mono text-[9px]">eIDAS Compliant</span>
-                  </div>
-
-                  <div className="py-2 space-y-1">
-                    <Link
-                      href="/pdf-tools/sign"
-                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-white bg-indigo-600/30 hover:bg-indigo-600/50 transition-colors"
-                    >
-                      <PenTool className="w-4 h-4 text-emerald-400" />
-                      <span>Fill & e-Sign PDF Workspace →</span>
-                    </Link>
-                    <Link
-                      href="/esignature-features"
-                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
-                    >
-                      <Sparkles className="w-4 h-4 text-indigo-400" />
-                      <span>eSignature Features</span>
-                    </Link>
-                    <Link
-                      href="/esignature-compliance-standards"
-                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
-                    >
-                      <Award className="w-4 h-4 text-cyan-400" />
-                      <span>Signature Standards (SES, AES, QES)</span>
-                    </Link>
-                    <Link
-                      href="/esignature-security"
-                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span>Security & Zero-Server Trust</span>
-                    </Link>
-                    <Link
-                      href="/legal-validity"
-                      className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
-                    >
-                      <Scale className="w-4 h-4 text-amber-400" />
-                      <span>Legal Validity & Enforceability</span>
-                    </Link>
-                  </div>
-
-                  <div className="pt-2 space-y-1">
-                    <div className="px-3 py-1 text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                      Industries Solutions
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 text-[11px]">
-                      <Link href="/esignatures-for-insurance" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Insurance</Link>
-                      <Link href="/esignatures-for-real-estate" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Real Estate</Link>
-                      <Link href="/esignatures-for-financial-services" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Finance</Link>
-                      <Link href="/esignatures-for-legal-services" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">Legal</Link>
-                      <Link href="/esignatures-for-human-resources" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">HR & Hiring</Link>
-                      <Link href="/esignatures-for-sales" className="p-1.5 text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg">B2B Sales</Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <SignDropdownMenu
+              isOpen={isSignMenuOpen}
+              onToggle={() => {
+                setIsSignMenuOpen(!isSignMenuOpen);
+                setIsImageToolsMenuOpen(false);
+                setIsPdfMenuOpen(false);
+              }}
+              onClose={() => setIsSignMenuOpen(false)}
+            />
 
             {/* All Image Tools Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setIsImageToolsMenuOpen(!isImageToolsMenuOpen);
-                  setIsPdfMenuOpen(false);
-                  setIsSignMenuOpen(false);
-                }}
-                onBlur={() => setTimeout(() => setIsImageToolsMenuOpen(false), 250)}
-                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 transition-all shadow-sm cursor-pointer"
-              >
-                <ImageIcon className="w-4 h-4 text-indigo-400" />
-                <span className="hidden sm:inline">Image Tools</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isImageToolsMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isImageToolsMenuOpen && (
-                <div className="absolute top-full right-0 lg:left-0 lg:right-auto mt-2 w-[340px] sm:w-[420px] max-h-[500px] overflow-y-auto bg-[#0d121e] border border-white/15 rounded-2xl shadow-2xl p-3 z-50 divide-y divide-white/10 backdrop-blur-2xl animate-fade-in">
-                  <div className="px-3 py-2 text-[10px] font-black uppercase text-indigo-400 tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                      iLoveIMG Equivalent Suite
-                    </span>
-                    <span className="text-slate-400 font-mono text-[9px]">13+ Tools</span>
-                  </div>
-
-                  <div className="py-2 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    {IMAGE_TOOLS.map((tool) => (
-                      <Link
-                        key={tool.id}
-                        href={tool.route}
-                        className="flex items-start gap-2.5 p-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors group"
-                      >
-                        <div className="p-2 rounded-lg bg-white/[0.04] border border-white/10 group-hover:scale-105 transition-transform shrink-0">
-                          {getToolIcon(tool.iconName)}
-                        </div>
-                        <div className="overflow-hidden">
-                          <div className="font-bold flex items-center gap-1.5 text-white text-xs">
-                            <span className="truncate">{tool.name}</span>
-                            {tool.badge && (
-                              <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/30">
-                                {tool.badge}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-slate-400 truncate mt-0.5">{tool.shortDescription}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ImageToolsDropdownMenu
+              isOpen={isImageToolsMenuOpen}
+              onToggle={() => {
+                setIsImageToolsMenuOpen(!isImageToolsMenuOpen);
+                setIsPdfMenuOpen(false);
+                setIsSignMenuOpen(false);
+              }}
+              onClose={() => setIsImageToolsMenuOpen(false)}
+            />
 
             {/* PDF Tools Dropdown */}
             <div className="relative">
@@ -256,38 +102,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
                   setIsSignMenuOpen(false);
                 }}
                 onBlur={() => setTimeout(() => setIsPdfMenuOpen(false), 250)}
-                className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 min-h-[36px] text-sm font-medium px-3 py-1.5 rounded-lg text-slate-300 hover:text-slate-50 hover:bg-slate-800/80 transition-colors"
               >
-                <FileStack className="w-4 h-4 text-cyan-400" />
+                <FileStack className="w-4 h-4 text-indigo-400/80" />
                 <span className="hidden sm:inline">PDF Suite</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isPdfMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform ${isPdfMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isPdfMenuOpen && (
-                <div className="absolute top-full right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-[#0d121e] border border-white/15 rounded-2xl shadow-2xl p-2.5 z-50 divide-y divide-white/10 backdrop-blur-2xl">
-                  <div className="px-3 py-2 text-[10px] font-black uppercase text-indigo-400 tracking-wider flex items-center gap-1.5">
-                    <FileStack className="w-3 h-3 text-cyan-400" />
+                <div className="fixed top-16 left-4 right-4 sm:absolute sm:top-[calc(100%+0.5rem)] sm:right-0 sm:left-auto sm:w-80 max-h-[calc(100vh-5rem)] sm:max-h-96 overflow-y-auto bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-2 z-50 divide-y divide-slate-700/50">
+                  <div className="px-3 py-2 text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center gap-1.5">
+                    <FileStack className="w-3 h-3" />
                     <span>Browser PDF Suite</span>
                   </div>
-                  <div className="py-1.5">
+                  <div className="py-1">
                     <Link
                       href="/pdf-tools"
-                      className="block px-3 py-2 rounded-xl text-xs font-bold text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors"
+                      className="block px-3 py-2 rounded-md text-xs font-semibold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors"
                     >
                       Browse All PDF Tools Hub →
                     </Link>
                   </div>
-                  <div className="py-1 space-y-1">
+                  <div className="py-1 space-y-0.5">
                     {PDF_TOOLS.map((tool) => (
                       <Link
                         key={tool.id}
                         href={tool.route}
-                        className="block px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                        className="block px-3 py-2 rounded-md text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
                       >
-                        <div className="font-bold flex items-center justify-between">
+                        <div className="font-medium flex items-center justify-between">
                           <span>{tool.name}</span>
                           {tool.badge && (
-                            <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                            <span className="text-[9px] font-medium text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                               {tool.badge}
                             </span>
                           )}
@@ -302,9 +148,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSelectPresetDoc }) => {
 
             <button
               onClick={() => setIsPresetModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 min-h-[36px] text-sm font-medium px-3 py-1.5 rounded-lg text-slate-300 hover:text-slate-50 hover:bg-slate-800/80 transition-colors"
             >
-              <Layers className="w-4 h-4 text-emerald-400" />
+              <Layers className="w-4 h-4 text-emerald-400/80" />
               <span className="hidden md:inline">Exam Presets</span>
             </button>
           </nav>

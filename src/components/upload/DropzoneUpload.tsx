@@ -23,8 +23,6 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
 
   const processSelectedFile = useCallback((file: File) => {
     setErrorMsg(null);
-
-    // Limit maximum upload size (e.g. 25 MB)
     if (file.size > 25 * 1024 * 1024) {
       setErrorMsg('This file is too large. Please upload a document smaller than 25 MB.');
       return;
@@ -34,20 +32,18 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
     const originalSizeKB = Number((file.size / 1024).toFixed(2));
 
     if (isPdf) {
-      const previewUrl = '/pdf-icon.png';
       onFileUpload({
         id: Date.now().toString(),
         file,
         name: file.name,
         originalSizeKB,
         type: 'application/pdf',
-        previewUrl,
+        previewUrl: '/pdf-icon.png',
         isPdf: true
       });
       return;
     }
 
-    // Process image dimensions
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
 
@@ -73,30 +69,6 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
     img.src = objectUrl;
   }, [onFileUpload]);
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processSelectedFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      processSelectedFile(e.target.files[0]);
-    }
-  };
-
   return (
     <div className="w-full space-y-4">
       <input
@@ -104,21 +76,26 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
         type="file"
         accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
         className="hidden"
-        onChange={handleChange}
+        onChange={(e) => {
+          if (e.target.files && e.target.files[0]) processSelectedFile(e.target.files[0]);
+        }}
       />
 
       {!uploadedFile ? (
         <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            if (e.dataTransfer.files?.[0]) processSelectedFile(e.dataTransfer.files[0]);
+          }}
           className={`relative border-2 border-dashed rounded-3xl p-6 sm:p-10 text-center transition-all duration-300 group cursor-pointer ${
             isDragging
               ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01] shadow-2xl shadow-indigo-500/20'
               : 'border-white/15 hover:border-indigo-500/50 bg-[#0d121e]/80 hover:bg-[#0d121e] shadow-xl'
           }`}
         >
-          {/* Animated Glow Backing */}
           <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300 shadow-inner">
             <UploadCloud className="w-8 h-8 text-indigo-400 group-hover:text-indigo-300" />
           </div>
@@ -130,12 +107,11 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
             Passport Photos, Signatures, Thumb Impressions, Certificates (JPG, PNG, WEBP, PDF).
           </p>
 
-          {/* Action Buttons: File Picker & Camera Capture */}
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition-all transform hover:scale-[1.02]"
+              className="px-5 py-2.5 min-h-[44px] bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition-all transform hover:scale-[1.02] cursor-pointer"
             >
               <ImageIcon className="w-4 h-4" />
               <span>Select File from Device</span>
@@ -144,7 +120,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
             <button
               type="button"
               onClick={() => setIsCameraOpen(true)}
-              className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all transform hover:scale-[1.02]"
+              className="px-5 py-2.5 min-h-[44px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all transform hover:scale-[1.02] cursor-pointer"
             >
               <Camera className="w-4 h-4" />
               <span>Capture Photo via Camera</span>
@@ -162,21 +138,14 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
           </div>
         </div>
       ) : (
-        /* Uploaded File Active Card */
         <div className="bg-[#0d121e] border border-indigo-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 animate-fade-in relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl pointer-events-none" />
-
           <div className="flex items-start justify-between gap-4 relative z-10">
             <div className="flex items-center gap-4 overflow-hidden">
               <div className="w-16 h-16 rounded-2xl bg-[#080b11] border border-white/15 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                 {uploadedFile.isPdf ? (
                   <File className="w-8 h-8 text-amber-400" />
                 ) : (
-                  <img
-                    src={uploadedFile.previewUrl}
-                    alt="Source Preview"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={uploadedFile.previewUrl} alt="Source Preview" className="w-full h-full object-cover" />
                 )}
               </div>
 
@@ -209,8 +178,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
               <button
                 type="button"
                 onClick={() => setIsCameraOpen(true)}
-                className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
-                title="Retake Photo using Camera"
+                className="px-3 py-2 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Camera</span>
@@ -222,7 +190,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
                   onClearFile();
                   if (inputRef.current) inputRef.current.value = '';
                 }}
-                className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-all"
+                className="px-3.5 py-2 min-h-[44px] bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-all cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
                 <span>Change File</span>
@@ -239,17 +207,13 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
         </div>
       )}
 
-      {/* Camera Capture Modal */}
       {isCameraOpen && (
         <CameraCaptureModal
           isOpen={isCameraOpen}
           onClose={() => setIsCameraOpen(false)}
-          onCapture={(file) => {
-            processSelectedFile(file);
-          }}
+          onCapture={(file) => processSelectedFile(file)}
         />
       )}
     </div>
   );
 };
-

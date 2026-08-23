@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { X, Search, Check, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Search, FileText, ArrowRight, Sparkles } from 'lucide-react';
 import { EXAM_PRESETS } from '@/config/presets';
 import { ExamPreset, SingleDocSpec } from '@/types/presets';
 
@@ -41,44 +41,42 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in">
-      <div className="bg-[#0d121e] border border-white/15 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative backdrop-blur-2xl">
-        {/* Header */}
+      <div className="glass-panel-antigravity rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative backdrop-blur-2xl">
         <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between bg-[#080b11]/90">
           <div>
             <h2 className="text-xl font-black text-white flex items-center gap-2.5 tracking-tight">
-              <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shadow-inner">
                 <Search className="w-4 h-4 text-indigo-400" />
               </div>
               <span>Search Official Exam Requirement Database</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-300 mt-1">
               Select any exam requirement preset to automatically set exact format, KB range limits, & pixel dimensions.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all border border-transparent hover:border-white/10"
+            className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-2xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all border border-transparent hover:border-white/10 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Search & Category Filter Bar */}
-        <div className="p-4 sm:p-5 bg-[#0d121e] border-b border-white/10 space-y-3.5">
+        <div className="p-4 sm:p-5 bg-[#0d121e]/80 border-b border-white/10 space-y-3.5">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
             <input
               type="text"
               placeholder="Search exam e.g. 'SSC CGL Photo', 'UPTET Signature', 'NEET', 'UPSC'..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#080b11] text-white pl-11 pr-4 py-3 rounded-2xl border border-white/15 text-sm focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500"
+              className="w-full bg-[#080b11] text-white pl-11 pr-4 py-3 min-h-[44px] rounded-2xl border border-white/15 text-sm focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-400 shadow-inner"
               autoFocus
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-white text-xs bg-white/10 px-2.5 py-1.5 min-h-[36px] rounded-lg border border-white/10 cursor-pointer"
               >
                 Clear
               </button>
@@ -98,10 +96,10 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-all ${
+                className={`px-3.5 py-2 min-h-[44px] rounded-xl font-bold transition-all cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                    : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08] border border-white/10'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/35 border border-indigo-400'
+                    : 'bg-white/[0.04] text-slate-300 hover:text-white hover:bg-white/[0.08] border border-white/10'
                 }`}
               >
                 {cat.label}
@@ -110,11 +108,10 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
           </div>
         </div>
 
-        {/* Content List */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
           {filteredPresets.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
-              <FileText className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+              <FileText className="w-12 h-12 mx-auto text-slate-500 mb-3" />
               <p className="font-bold text-white text-base">No preset found matching &quot;{searchTerm}&quot;</p>
               <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
                 You can still use Custom Specifications mode on the main screen to enter custom dimensions and KB limits.
@@ -122,7 +119,7 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
             </div>
           ) : (
             filteredPresets.map((exam) => (
-              <div key={exam.id} className="bg-[#080b11] border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-inner">
+              <div key={exam.id} className="bg-[#080b11]/80 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-3 shadow-inner">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
                     <h3 className="font-extrabold text-white text-base tracking-tight">{exam.name}</h3>
@@ -139,16 +136,16 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                     return (
                       <div
                         key={key}
-                        className="bg-[#0d121e] border border-white/10 hover:border-indigo-500/50 p-4 rounded-xl flex flex-col justify-between transition-all group cursor-pointer hover:scale-[1.01] shadow-md"
+                        className="antigravity-card-3d p-4 rounded-xl flex flex-col justify-between cursor-pointer group"
                         onClick={() => onSelectRequirement(doc, exam)}
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold text-white text-xs group-hover:text-indigo-400 transition-colors flex items-center gap-1.5">
+                            <span className="font-extrabold text-white text-xs group-hover:text-indigo-300 transition-colors flex items-center gap-1.5">
                               <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                               {doc.title}
                             </span>
-                            <span className="text-[10px] bg-white/10 text-slate-300 px-2 py-0.5 rounded font-mono font-bold">
+                            <span className="text-[10px] bg-white/10 text-slate-200 px-2 py-0.5 rounded font-mono font-bold">
                               {doc.format.join(', ')}
                             </span>
                           </div>
@@ -180,11 +177,10 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-4 bg-[#080b11] border-t border-white/10 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 rounded-xl text-xs font-bold transition-all"
+            className="px-5 py-2.5 min-h-[44px] bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             Close Window
           </button>
@@ -193,4 +189,3 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
     </div>
   );
 };
-

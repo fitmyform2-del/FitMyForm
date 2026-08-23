@@ -24,14 +24,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Minimize2',
     seoTitle: 'Free Online Image Compressor - Reduce JPG, PNG, WEBP File Size',
     seoDescription: 'Compress images online without losing quality. Reduce file size of JPG, PNG, WEBP, and SVG images with fast client-side privacy.',
-    keywords: [
-      'compress image online',
-      'reduce image size in kb',
-      'compress jpg free',
-      'png compressor',
-      'webp size reducer',
-      'image compression tool'
-    ]
+    keywords: ['compress image online', 'reduce image size in kb', 'compress jpg free', 'png compressor', 'webp size reducer', 'image compression tool']
   },
   {
     id: 'resize-image',
@@ -43,13 +36,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Maximize2',
     seoTitle: 'Online Image Resizer - Resize Photo Dimensions in Pixels or Percent',
     seoDescription: 'Resize JPG, PNG, SVG, and WEBP images by custom pixel dimensions or percentages. Free client-side image resizer for web & forms.',
-    keywords: [
-      'resize image online',
-      'image resizer pixels',
-      'resize photo by percentage',
-      'change image resolution',
-      'photo size editor'
-    ]
+    keywords: ['resize image online', 'image resizer pixels', 'resize photo by percentage', 'change image resolution', 'photo size editor']
   },
   {
     id: 'crop-image',
@@ -61,13 +48,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Crop',
     seoTitle: 'Free Online Image Cropper - Crop JPG, PNG, GIF with Visual Selector',
     seoDescription: 'Crop images online for free. Select square 1:1, 16:9, 4:3 aspect ratios or crop custom pixel dimensions visually in browser.',
-    keywords: [
-      'crop image online',
-      'crop photo free',
-      'visual image cropper',
-      'crop png online',
-      'aspect ratio cropper'
-    ]
+    keywords: ['crop image online', 'crop photo free', 'visual image cropper', 'crop png online', 'aspect ratio cropper']
   },
   {
     id: 'convert-to-jpg',
@@ -79,13 +60,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'FileImage',
     seoTitle: 'Convert PNG, WEBP, HEIC, GIF to JPG Online Free',
     seoDescription: 'Convert any image format to high quality JPG. Bulk convert PNG, WEBP, GIF, SVG, and HEIC files to JPG format instantly.',
-    keywords: [
-      'convert to jpg',
-      'png to jpg converter',
-      'webp to jpg online',
-      'heic to jpg converter',
-      'convert image to jpeg'
-    ]
+    keywords: ['convert to jpg', 'png to jpg converter', 'webp to jpg online', 'heic to jpg converter', 'convert image to jpeg']
   },
   {
     id: 'convert-from-jpg',
@@ -97,12 +72,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Repeat',
     seoTitle: 'Convert JPG to PNG, WEBP & GIF Online Free',
     seoDescription: 'Convert JPG photos to transparent PNG, optimized WEBP, or animated GIF format. Fast browser processing with zero upload delay.',
-    keywords: [
-      'jpg to png converter',
-      'convert jpg to webp',
-      'jpg to gif maker',
-      'convert jpeg to png online'
-    ]
+    keywords: ['jpg to png converter', 'convert jpg to webp', 'jpg to gif maker', 'convert jpeg to png online']
   },
   {
     id: 'photo-editor',
@@ -115,13 +85,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Wand2',
     seoTitle: 'Free Online Photo Editor - Edit Photos with Filters, Text & FX',
     seoDescription: 'Edit your photos online for free. Adjust brightness, contrast, hue, apply retro & vintage filters, add custom text and stickers.',
-    keywords: [
-      'online photo editor free',
-      'photo filter maker',
-      'add text to photo online',
-      'edit pictures in browser',
-      'free image editor'
-    ]
+    keywords: ['online photo editor free', 'photo filter maker', 'add text to photo online', 'edit pictures in browser', 'free image editor']
   },
   {
     id: 'upscale-image',
@@ -134,13 +98,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Sparkles',
     seoTitle: 'Upscale Image Online Free - Enlarge Photos 2x 4x High Resolution',
     seoDescription: 'Upscale images online for free. Increase image resolution 2x or 4x with bicubic sharpening interpolation without losing clarity.',
-    keywords: [
-      'upscale image online',
-      'enlarge photo 4k',
-      'image upscaler free',
-      'increase image resolution',
-      'photo sharpener'
-    ]
+    keywords: ['upscale image online', 'enlarge photo 4k', 'image upscaler free', 'increase image resolution', 'photo sharpener']
   },
   {
     id: 'remove-background',
@@ -153,12 +111,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Eraser',
     seoTitle: 'Free Background Remover - Remove Image Background Online',
     seoDescription: 'Remove background from image online for free. Cut out subject and make background transparent PNG or solid color in browser.',
-    keywords: [
-      'remove background from image',
-      'transparent background maker',
-      'bg remover online',
-      'image cutout tool free'
-    ]
+    keywords: ['remove background from image', 'transparent background maker', 'bg remover online', 'image cutout tool free']
   },
   {
     id: 'watermark-image',
@@ -170,12 +123,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Shield',
     seoTitle: 'Watermark Image Online Free - Add Text & Logo to Photos',
     seoDescription: 'Watermark photos online for free. Protect copyright by adding custom text, PNG logos, opacity, font styling, and tiled watermarks.',
-    keywords: [
-      'watermark image online',
-      'add watermark to photo',
-      'logo watermark maker',
-      'protect photo copyright'
-    ]
+    keywords: ['watermark image online', 'add watermark to photo', 'logo watermark maker', 'protect photo copyright']
   },
   {
     id: 'meme-generator',
@@ -188,12 +136,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Smile',
     seoTitle: 'Free Online Meme Generator - Custom Meme Maker with Text',
     seoDescription: 'Create custom memes online for free. Choose popular classic meme templates or upload your own photo with custom Impact text.',
-    keywords: [
-      'meme generator free',
-      'make meme online',
-      'custom meme maker',
-      'caption photo meme'
-    ]
+    keywords: ['meme generator free', 'make meme online', 'custom meme maker', 'caption photo meme']
   },
   {
     id: 'rotate-image',
@@ -205,12 +148,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'RotateCw',
     seoTitle: 'Rotate Image Online Free - Rotate JPG, PNG, GIF 90 Degrees',
     seoDescription: 'Rotate images online for free. Rotate JPG, PNG, and WEBP photos 90° clockwise, counter-clockwise, or flip horizontally & vertically.',
-    keywords: [
-      'rotate image online',
-      'rotate photo 90 degrees',
-      'flip image horizontal vertical',
-      'batch image rotator'
-    ]
+    keywords: ['rotate image online', 'rotate photo 90 degrees', 'flip image horizontal vertical', 'batch image rotator']
   },
   {
     id: 'html-to-image',
@@ -222,12 +160,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'Code',
     seoTitle: 'HTML to Image Converter - Render HTML CSS Snippet to PNG JPG',
     seoDescription: 'Convert HTML code and CSS styling into high quality PNG or JPG images online. Ideal for code snippets, cards, and web graphics.',
-    keywords: [
-      'html to image converter',
-      'render html to png',
-      'html to jpg online',
-      'code snippet image generator'
-    ]
+    keywords: ['html to image converter', 'render html to png', 'html to jpg online', 'code snippet image generator']
   },
   {
     id: 'blur-face',
@@ -240,12 +173,7 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     iconName: 'EyeOff',
     seoTitle: 'Blur Face in Photo Online Free - Censor Sensitive Image Data',
     seoDescription: 'Blur faces and private information in photos online. Draw blur boxes or pixelate sensitive text, license plates, and documents securely.',
-    keywords: [
-      'blur face photo online',
-      'censor image free',
-      'pixelate photo region',
-      'blur sensitive info photo'
-    ]
+    keywords: ['blur face photo online', 'censor image free', 'pixelate photo region', 'blur sensitive info photo']
   }
 ];
 

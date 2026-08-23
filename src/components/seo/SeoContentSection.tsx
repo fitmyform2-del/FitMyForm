@@ -14,7 +14,6 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
   description,
   faqs
 }) => {
-  // Schema JSON-LD structured data for SEO ranking
   const webAppSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
@@ -56,7 +55,6 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
 
   return (
     <section className="mt-16 border-t border-white/10 pt-12 space-y-12 max-w-5xl mx-auto">
-      {/* Structured Data Scripts */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
@@ -66,54 +64,51 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
 
-      {/* Title & Overview */}
       <div className="space-y-3 text-center sm:text-left">
         <h2 className="text-2xl font-black text-white tracking-tight">{title}</h2>
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">{description}</p>
       </div>
 
-      {/* Feature Highlights Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-emerald-500/40 transition-all">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+        <div className="antigravity-card-3d p-6 rounded-3xl space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center shadow-inner">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
           </div>
           <h3 className="font-extrabold text-sm text-white">100% Client-Side Privacy</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-300 leading-relaxed">
             No document is ever uploaded to any cloud server. Your sensitive photos, Aadhaar cards, and signatures remain safely inside your browser memory.
           </p>
         </div>
 
-        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-indigo-500/40 transition-all">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+        <div className="antigravity-card-3d p-6 rounded-3xl space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center shadow-inner">
             <Zap className="w-5 h-5 text-indigo-400" />
           </div>
           <h3 className="font-extrabold text-sm text-white">High-Precision Compression</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-300 leading-relaxed">
             Iterative binary search quality adjustments guarantee your file fits exactly inside the required KB window (e.g. 20–50 KB) without blurriness.
           </p>
         </div>
 
-        <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-5 space-y-3 shadow-xl backdrop-blur-2xl hover:border-cyan-500/40 transition-all">
-          <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+        <div className="antigravity-card-3d p-6 rounded-3xl space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/35 flex items-center justify-center shadow-inner">
             <FileText className="w-5 h-5 text-cyan-400" />
           </div>
           <h3 className="font-extrabold text-sm text-white">Official Exam Specs</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-slate-300 leading-relaxed">
             Pre-loaded requirements database for SSC, UPSC, IBPS, RRB Railway, NTA NEET/JEE, UPTET, CTET, and University Admissions.
           </p>
         </div>
       </div>
 
-      {/* Common Exam Specifications Table */}
-      <div className="bg-[#0d121e] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl backdrop-blur-2xl">
+      <div className="glass-panel-antigravity rounded-3xl p-6 space-y-4 shadow-2xl">
         <h3 className="font-extrabold text-base text-white flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-indigo-400" />
           <span>Standard Indian Exam Document Requirements Cheat Sheet</span>
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left text-slate-300">
-            <thead className="bg-[#080b11] text-slate-400 uppercase font-mono text-[10px] border-b border-white/10">
+            <thead className="bg-[#080b11]/80 text-slate-300 uppercase font-mono text-[10px] border-b border-white/10">
               <tr>
                 <th className="p-3.5">Exam Portal</th>
                 <th className="p-3.5">Doc Type</th>
@@ -163,10 +158,9 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
         </div>
       </div>
 
-      {/* Frequently Asked Questions (FAQ) */}
       <div className="space-y-5">
         <h3 className="font-extrabold text-xl text-white flex items-center gap-2.5 tracking-tight">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shadow-inner">
             <HelpCircle className="w-4 h-4 text-indigo-400" />
           </div>
           <span>Frequently Asked Questions (FAQ)</span>
@@ -174,7 +168,7 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
 
         <div className="space-y-3.5">
           {faqs.map((faq, idx) => (
-            <div key={idx} className="bg-[#0d121e] border border-white/10 rounded-2xl p-5 space-y-2 shadow-lg backdrop-blur-2xl">
+            <div key={idx} className="glass-panel rounded-2xl p-5 space-y-2 shadow-lg">
               <h4 className="font-extrabold text-white text-sm flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>{faq.question}</span>
@@ -189,4 +183,3 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
     </section>
   );
 };
-

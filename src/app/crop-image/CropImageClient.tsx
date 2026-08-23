@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
-import { Crop, Download, RefreshCw, CheckCircle2, Sliders, ArrowRight } from 'lucide-react';
+import { Crop, Download, RefreshCw, CheckCircle2, ArrowRight } from 'lucide-react';
+import { CropControls } from './_components/CropControls';
 
 export default function CropImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null); // null = freeform, 1 = 1:1, 1.777 = 16:9, etc.
-  const [cropBox, setCropBox] = useState({ x: 10, y: 10, width: 80, height: 80 }); // in percentages
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [cropBox, setCropBox] = useState({ x: 10, y: 10, width: 80, height: 80 });
   const [isProcessing, setIsProcessing] = useState(false);
   const [croppedResultUrl, setCroppedResultUrl] = useState<string | null>(null);
   const [croppedDimensions, setCroppedDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -27,7 +28,6 @@ export default function CropImageClient() {
   const handleAspectChange = (ratio: number | null) => {
     setAspectRatio(ratio);
     if (ratio !== null) {
-      // Adjust height based on aspect ratio
       const newHeight = Math.min(90, cropBox.width / ratio);
       setCropBox((prev) => ({ ...prev, height: newHeight }));
     }
@@ -102,42 +102,20 @@ export default function CropImageClient() {
                       setUploadedFile(null);
                       setCroppedResultUrl(null);
                     }}
-                    className="text-xs text-rose-400 hover:underline font-bold"
+                    className="text-xs text-rose-400 hover:underline font-bold min-h-[44px]"
                   >
                     Change Photo
                   </button>
                 </div>
 
-                {/* Aspect Ratio Selector */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Sliders className="w-4 h-4 text-indigo-400" /> Aspect Ratio Presets
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { label: 'Freeform', ratio: null },
-                      { label: '1:1 Square', ratio: 1 },
-                      { label: '16:9 Landscape', ratio: 16 / 9 },
-                      { label: '4:3 Standard', ratio: 4 / 3 },
-                      { label: '3:2 Photo', ratio: 3 / 2 },
-                      { label: '9:16 Story', ratio: 9 / 16 }
-                    ].map((item) => (
-                      <button
-                        key={item.label}
-                        onClick={() => handleAspectChange(item.ratio)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                          aspectRatio === item.ratio
-                            ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
-                            : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08]'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <CropControls
+                  aspectRatio={aspectRatio}
+                  cropBox={cropBox}
+                  onAspectChange={handleAspectChange}
+                  onCropBoxChange={setCropBox}
+                />
 
-                {/* Visual Image Preview Container with Crop Box */}
+                {/* Visual Image Preview Container */}
                 <div className="relative overflow-hidden rounded-2xl bg-black/40 border border-white/10 p-2 flex items-center justify-center min-h-[300px] select-none">
                   <img
                     ref={imgRef}
@@ -147,51 +125,11 @@ export default function CropImageClient() {
                   />
                 </div>
 
-                {/* Range Sliders to Adjust Crop Area */}
-                <div className="grid grid-cols-2 gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold text-slate-300">
-                      <span>Crop Width</span>
-                      <span>{cropBox.width}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="20"
-                      max="100"
-                      value={cropBox.width}
-                      onChange={(e) => {
-                        const w = Number(e.target.value);
-                        const h = aspectRatio ? Math.min(100, w / aspectRatio) : cropBox.height;
-                        setCropBox({ ...cropBox, width: w, height: h });
-                      }}
-                      className="w-full accent-indigo-500"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold text-slate-300">
-                      <span>Crop Height</span>
-                      <span>{cropBox.height}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="20"
-                      max="100"
-                      value={cropBox.height}
-                      onChange={(e) => {
-                        const h = Number(e.target.value);
-                        const w = aspectRatio ? Math.min(100, h * aspectRatio) : cropBox.width;
-                        setCropBox({ ...cropBox, height: h, width: w });
-                      }}
-                      className="w-full accent-indigo-500"
-                    />
-                  </div>
-                </div>
-
                 {/* Action CTA */}
                 <button
                   onClick={executeCrop}
                   disabled={isProcessing}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
                 >
                   {isProcessing ? (
                     <>
@@ -234,7 +172,7 @@ export default function CropImageClient() {
                 <a
                   href={croppedResultUrl}
                   download={`cropped-${uploadedFile?.name || 'image.jpg'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Cropped Image</span>
@@ -250,22 +188,13 @@ export default function CropImageClient() {
           </div>
         </div>
 
-        {/* SEO Guide Section */}
         <SeoContentSection
-          title="Free Online Image Cropper - Crop Photos with Zero Quality Loss"
-          description="Cropping images is essential for social media avatars, passport photos, website hero banners, and online exam registration forms. FitMyForm's client-side crop engine allows you to trim margins and select aspect ratios (1:1, 16:9, 4:3, 3:2) without sending your files to any external server."
+          title="Free Online Visual Image Cropper"
+          description="Crop your images visually directly in your browser. Maintain aspect ratio locks for passport photos, social media stories, or custom application form specs with zero server upload."
           faqs={[
             {
-              question: 'How do I crop an image to a 1:1 square for Instagram or profile photos?',
-              answer: 'Upload your photo, select "1:1 Square" from the aspect ratio presets, adjust the crop box slider, and click Crop Selected Region to download your perfectly square image.'
-            },
-            {
-              question: 'Does cropping reduce photo quality?',
-              answer: 'No! FitMyForm crops images directly at native pixel resolution using canvas hardware acceleration without adding unnecessary compression.'
-            },
-            {
-              question: 'Are my uploaded pictures kept private?',
-              answer: 'Yes, 100% private. All cropping calculations are processed locally inside your web browser. Your images never leave your computer or mobile phone.'
+              question: 'How do I crop an image to 1:1 square for Instagram or profile photo?',
+              answer: 'Select the 1:1 Square aspect ratio preset, adjust crop box bounds, and click Crop Selected Region.'
             }
           ]}
         />

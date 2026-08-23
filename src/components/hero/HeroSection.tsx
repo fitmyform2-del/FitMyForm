@@ -13,84 +13,86 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onQuickPresetSelect
 }) => {
   return (
-    <div className="relative overflow-hidden py-8 sm:py-12 px-4 sm:px-6 lg:px-8 text-center">
-      {/* Dynamic Background Glow Haloes */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-indigo-600/10 blur-[140px] rounded-full pointer-events-none -z-10" />
-      <div className="absolute top-1/3 right-1/4 w-[450px] h-[250px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse-glow" />
-
-      {/* Pill Badge */}
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold mb-6 shadow-lg shadow-indigo-500/5 animate-float-subtle">
-        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+    <div className="relative overflow-hidden py-8 sm:py-14 px-4 sm:px-6 lg:px-8 text-center">
+      {/* Floating Pill Badge */}
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-6">
+        <Sparkles className="w-4 h-4" />
         <span>100% Free Client-Side Student Document Formatter</span>
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
       </div>
 
       {/* Main Title */}
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15] max-w-5xl mx-auto">
+      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.15] max-w-5xl mx-auto">
         Format Photos & Documents to Exact Specs for{' '}
-        <span className="gradient-text font-black">SSC, UPSC, Banking & Online Exams</span>
+        <span className="text-indigo-400">SSC, UPSC, Banking & Online Exams</span>
       </h1>
 
-      {/* Description */}
-      <p className="mt-4 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-        Upload photo, signature, thumb print, or PDF. Format to exact pixel dimensions (e.g. <strong className="text-indigo-400 font-mono">200 × 230 px</strong>) and target KB limits (e.g. <strong className="text-emerald-400 font-mono">20–50 KB JPG</strong>) in seconds with 0 server uploads.
+      {/* Subtitle Description */}
+      <p className="mt-5 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+        Upload photo, signature, thumb print, or PDF. Format to exact pixel dimensions (e.g. <strong className="text-indigo-300 font-mono">200 × 230 px</strong>) and target KB limits (e.g. <strong className="text-emerald-400 font-mono">20–50 KB JPG</strong>) in seconds with zero server uploads.
       </p>
 
       {/* Guarantee Badges Row */}
-      <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-slate-300 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl py-2.5 px-5 max-w-2xl mx-auto shadow-xl">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="font-medium text-slate-200">100% Zero-Server Upload</span>
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300 bg-slate-800/50 rounded-xl py-4 px-6 max-w-3xl mx-auto border border-slate-700/50">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 flex-1 sm:flex-none">
+            <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span className="font-semibold tracking-wide text-[11px] sm:text-xs">Zero Server Upload</span>
+          </div>
+          <div className="w-[1px] h-6 bg-slate-700 hidden sm:block" />
+          <div className="flex flex-col sm:flex-row items-center gap-2 flex-1 sm:flex-none">
+            <Zap className="w-5 h-5 text-amber-400 shrink-0" />
+            <span className="font-semibold tracking-wide text-[11px] sm:text-xs">Instant Processing</span>
+          </div>
         </div>
-        <div className="w-1 h-1 rounded-full bg-slate-700 hidden sm:block" />
-        <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="font-medium text-slate-200">Instant Canvas Processing</span>
-        </div>
-        <div className="w-1 h-1 rounded-full bg-slate-700 hidden sm:block" />
-        <div className="flex items-center gap-2">
-          <Award className="w-4 h-4 text-indigo-400 shrink-0" />
-          <span className="font-medium text-slate-200">Exact Pixel & KB Accuracy</span>
+        <div className="w-full h-[1px] sm:w-[1px] sm:h-6 bg-slate-700 block" />
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Award className="w-5 h-5 text-indigo-400 shrink-0" />
+          <span className="font-semibold tracking-wide text-[11px] sm:text-xs">Exact Pixel & KB Accuracy</span>
         </div>
       </div>
 
       {/* Exam Preset Shortcut Chips */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5 max-w-3xl mx-auto">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Popular Presets:</span>
-        <button
-          onClick={() => onQuickPresetSelect('ssc-cgl')}
-          className="bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 hover:border-indigo-500/60 text-indigo-300 text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
-        >
-          SSC Photo (20-50 KB)
-        </button>
-        <button
-          onClick={() => onQuickPresetSelect('ibps-banking')}
-          className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
-        >
-          IBPS Signature (10-20 KB)
-        </button>
-        <button
-          onClick={() => onQuickPresetSelect('upsc-civil-services')}
-          className="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 hover:border-blue-500/60 text-blue-300 text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
-        >
-          UPSC Photo (350x350)
-        </button>
-        <button
-          onClick={() => onQuickPresetSelect('rrb-railway')}
-          className="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/60 text-amber-300 text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all shadow-sm"
-        >
-          Railway RRB (350x450)
-        </button>
+      <div className="mt-9 flex flex-col items-center justify-center gap-4 max-w-3xl mx-auto w-full">
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          Popular Form Presets
+        </span>
+        
+        {/* Horizontal Scroll on Mobile */}
+        <div className="flex overflow-x-auto w-full pb-4 pt-1 px-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] gap-3 justify-start sm:justify-center">
+          <button
+            onClick={() => onQuickPresetSelect('ssc-cgl')}
+            className="snap-center shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium px-5 py-3 min-h-[48px] rounded-lg transition-colors cursor-pointer"
+          >
+            SSC Photo (20-50 KB)
+          </button>
+          <button
+            onClick={() => onQuickPresetSelect('ibps-banking')}
+            className="snap-center shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium px-5 py-3 min-h-[48px] rounded-lg transition-colors cursor-pointer"
+          >
+            IBPS Signature (10-20 KB)
+          </button>
+          <button
+            onClick={() => onQuickPresetSelect('upsc-civil-services')}
+            className="snap-center shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium px-5 py-3 min-h-[48px] rounded-lg transition-colors cursor-pointer"
+          >
+            UPSC Photo (350x350)
+          </button>
+          <button
+            onClick={() => onQuickPresetSelect('rrb-railway')}
+            className="snap-center shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium px-5 py-3 min-h-[48px] rounded-lg transition-colors cursor-pointer"
+          >
+            Railway RRB (350x450)
+          </button>
 
-        <button
-          onClick={onOpenPresetModal}
-          className="bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-slate-200 text-xs font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group"
-        >
-          <Search className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
-          <span>Search 30+ Exams...</span>
-        </button>
+          <button
+            onClick={onOpenPresetModal}
+            className="snap-center shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-5 py-3 min-h-[48px] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+          >
+            <Search className="w-4 h-4" />
+            <span>Search 30+ Exams...</span>
+          </button>
+        </div>
       </div>
     </div>
   );
 };
-

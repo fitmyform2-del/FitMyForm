@@ -7,7 +7,7 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { applyFiltersCanvas, FilterOptions } from '@/lib/image/editorTools';
-import { Wand2, Download, RefreshCw, CheckCircle2, Sliders, Sun, Contrast, Palette } from 'lucide-react';
+import { Wand2, Download, CheckCircle2, Sliders } from 'lucide-react';
 
 export default function PhotoEditorClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -23,12 +23,6 @@ export default function PhotoEditorClient() {
   });
 
   const [editedUrl, setEditedUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
-    setEditedUrl(null);
-  };
 
   const applyPreset = (presetName: string) => {
     switch (presetName) {
@@ -59,35 +53,23 @@ export default function PhotoEditorClient() {
     }
   };
 
-  const updateCanvas = async () => {
-    if (!uploadedFile) return;
-    setIsProcessing(true);
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = applyFiltersCanvas(img, filters);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          if (editedUrl) URL.revokeObjectURL(editedUrl);
-          setEditedUrl(URL.createObjectURL(blob));
-        }
-        setIsProcessing(false);
-      }, uploadedFile.file.type || 'image/jpeg', 0.95);
-    };
-    img.src = uploadedFile.previewUrl;
-  };
-
   useEffect(() => {
     let active = true;
     if (uploadedFile) {
-      setTimeout(() => {
-        if (active) updateCanvas();
-      }, 0);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const canvas = applyFiltersCanvas(img, filters);
+        canvas.toBlob((blob) => {
+          if (blob && active) {
+            if (editedUrl) URL.revokeObjectURL(editedUrl);
+            setEditedUrl(URL.createObjectURL(blob));
+          }
+        }, uploadedFile.file.type || 'image/jpeg', 0.95);
+      };
+      img.src = uploadedFile.previewUrl;
     }
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [uploadedFile, filters]);
 
   return (
@@ -111,19 +93,18 @@ export default function PhotoEditorClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 space-y-6">
             {!uploadedFile ? (
-              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={handleFileUpload} onClearFile={() => setUploadedFile(null)} />
+              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={(f) => { setUploadedFile(f); setEditedUrl(null); }} onClearFile={() => setUploadedFile(null)} />
             ) : (
               <div className="space-y-6 bg-[#0d121e] border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="font-extrabold text-white text-sm flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-indigo-400" /> Filter Presets & Sliders
                   </h3>
-                  <button onClick={() => applyPreset('reset')} className="text-xs text-rose-400 hover:underline font-bold">
+                  <button onClick={() => applyPreset('reset')} className="text-xs text-rose-400 hover:underline font-bold min-h-[44px]">
                     Reset All Filters
                   </button>
                 </div>
 
-                {/* Preset buttons */}
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: 'Normal / Original', name: 'reset' },
@@ -135,14 +116,13 @@ export default function PhotoEditorClient() {
                     <button
                       key={p.name}
                       onClick={() => applyPreset(p.name)}
-                      className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 transition-all"
+                      className="px-3.5 py-1.5 min-h-[44px] rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 text-xs font-bold text-slate-200 transition-all cursor-pointer"
                     >
                       {p.label}
                     </button>
                   ))}
                 </div>
 
-                {/* Sliders */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-slate-300">
@@ -155,7 +135,7 @@ export default function PhotoEditorClient() {
                       max="200"
                       value={filters.brightness}
                       onChange={(e) => setFilters({ ...filters, brightness: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500"
                     />
                   </div>
 
@@ -170,7 +150,7 @@ export default function PhotoEditorClient() {
                       max="200"
                       value={filters.contrast}
                       onChange={(e) => setFilters({ ...filters, contrast: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500"
                     />
                   </div>
 
@@ -185,7 +165,7 @@ export default function PhotoEditorClient() {
                       max="200"
                       value={filters.saturate}
                       onChange={(e) => setFilters({ ...filters, saturate: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500"
                     />
                   </div>
 
@@ -200,7 +180,7 @@ export default function PhotoEditorClient() {
                       max="360"
                       value={filters.hueRotate}
                       onChange={(e) => setFilters({ ...filters, hueRotate: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500"
                     />
                   </div>
                 </div>
@@ -223,7 +203,7 @@ export default function PhotoEditorClient() {
                 <a
                   href={editedUrl}
                   download={`edited-${uploadedFile?.name || 'photo.jpg'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Edited Photo</span>
