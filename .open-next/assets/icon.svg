@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="fitGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563eb"/>
+      <stop offset="0.5" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Rounded Shield Container -->
+  <rect width="64" height="64" rx="18" fill="url(#fitGrad)"/>
+  <rect x="3" y="3" width="58" height="58" rx="15" fill="#090d16"/>
+  
+  <!-- Document Sheet -->
+  <path d="M20 16C20 13.7909 21.7909 12 24 12H36L46 22V48C46 50.2091 44.2091 52 42 52H24C21.7909 52 20 50.2091 20 48V16Z" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+  <path d="M36 12V22H46" fill="#3b82f6" opacity="0.4"/>
+  <path d="M36 12V22H46" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round"/>
+  
+  <!-- Glowing Emerald Checkmark -->
+  <path d="M26 36L32 42L44 27" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
