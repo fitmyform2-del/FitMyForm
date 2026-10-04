@@ -25,21 +25,25 @@ export function rotateAndFlipCanvas(
 }
 
 /**
- * Remove Background based on color tolerance & edge threshold
+ * Remove Background based on color tolerance & contiguous edge flood fill
  */
 export function removeBackgroundCanvas(
   img: HTMLImageElement,
   targetColorHex: string = '#FFFFFF',
-  tolerance: number = 30, // 0 to 100
-  replacementColorHex: string | 'transparent' = 'transparent'
+  tolerance: number = 25, // 0 to 100
+  replacementColorHex: string | 'transparent' = 'transparent',
+  mode: 'contiguous' | 'global' = 'contiguous',
+  seedPoint?: { x: number; y: number }
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = img.width;
-  canvas.height = img.height;
+  const w = img.width;
+  const h = img.height;
+  canvas.width = w;
+  canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
   ctx.drawImage(img, 0, 0);
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, w, h);
   const data = imgData.data;
 
   // Convert Hex target color to RGB
@@ -57,22 +61,92 @@ export function removeBackgroundCanvas(
     repA = 255;
   }
 
-  const maxDist = (tolerance / 100) * 441.67; // Max Euclidean distance in RGB color space
+  const maxDist = (tolerance / 100) * 441.67;
+  const innerDist = maxDist * 0.7; // Inner boundary for soft feathering
 
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
+  const colorMatch = (idx: number): number => {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    return Math.sqrt((r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2);
+  };
 
-    const dist = Math.sqrt(
-      (r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2
-    );
+  if (mode === 'global') {
+    for (let i = 0; i < data.length; i += 4) {
+      const dist = colorMatch(i);
+      if (dist <= maxDist) {
+        if (replacementColorHex === 'transparent') {
+          const alphaFactor = dist <= innerDist ? 0 : (dist - innerDist) / (maxDist - innerDist);
+          data[i + 3] = Math.round(data[i + 3] * alphaFactor);
+        } else {
+          data[i] = repR;
+          data[i + 1] = repG;
+          data[i + 2] = repB;
+          data[i + 3] = repA;
+        }
+      }
+    }
+  } else {
+    // Contiguous Flood Fill from borders or clicked seed point
+    const visited = new Uint8Array(w * h);
+    const queue = new Int32Array(w * h);
+    let head = 0;
+    let tail = 0;
 
-    if (dist <= maxDist) {
-      data[i] = repR;
-      data[i + 1] = repG;
-      data[i + 2] = repB;
-      data[i + 3] = repA;
+    const pushPixel = (px: number, py: number) => {
+      if (px < 0 || px >= w || py < 0 || py >= h) return;
+      const pIdx = py * w + px;
+      if (visited[pIdx]) return;
+      visited[pIdx] = 1;
+
+      const byteIdx = pIdx * 4;
+      const dist = colorMatch(byteIdx);
+      if (dist <= maxDist) {
+        queue[tail++] = pIdx;
+      }
+    };
+
+    if (seedPoint && seedPoint.x >= 0 && seedPoint.x < w && seedPoint.y >= 0 && seedPoint.y < h) {
+      pushPixel(Math.round(seedPoint.x), Math.round(seedPoint.y));
+    } else {
+      // Seed from perimeter borders
+      for (let x = 0; x < w; x++) {
+        pushPixel(x, 0);
+        pushPixel(x, h - 1);
+      }
+      for (let y = 1; y < h - 1; y++) {
+        pushPixel(0, y);
+        pushPixel(w - 1, y);
+      }
+    }
+
+    // BFS Expansion
+    while (head < tail) {
+      const pIdx = queue[head++];
+      const px = pIdx % w;
+      const py = Math.floor(pIdx / w);
+
+      pushPixel(px + 1, py);
+      pushPixel(px - 1, py);
+      pushPixel(px, py + 1);
+      pushPixel(px, py - 1);
+    }
+
+    // Apply replacement to all reached background pixels with feathering
+    for (let i = 0; i < tail; i++) {
+      const pIdx = queue[i];
+      const byteIdx = pIdx * 4;
+      const dist = colorMatch(byteIdx);
+
+      if (replacementColorHex === 'transparent') {
+        const alphaFactor = dist <= innerDist ? 0 : (dist - innerDist) / (maxDist - innerDist);
+        data[byteIdx + 3] = Math.round(data[byteIdx + 3] * alphaFactor);
+      } else {
+        data[byteIdx] = repR;
+        data[byteIdx + 1] = repG;
+        data[byteIdx + 2] = repB;
+        data[byteIdx + 3] = repA;
+      }
     }
   }
 

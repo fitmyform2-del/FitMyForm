@@ -115,14 +115,37 @@ export default function CropImageClient() {
                   onCropBoxChange={setCropBox}
                 />
 
-                {/* Visual Image Preview Container */}
-                <div className="relative overflow-hidden rounded-2xl bg-black/40 border border-white/10 p-2 flex items-center justify-center min-h-[300px] select-none">
-                  <img
-                    ref={imgRef}
-                    src={uploadedFile.previewUrl}
-                    alt="Source Crop"
-                    className="max-h-[450px] w-auto object-contain rounded-lg"
-                  />
+                {/* Visual Image Preview Container with Rule-of-Thirds Crop Box */}
+                <div className="relative overflow-hidden rounded-2xl bg-black/60 border border-white/10 p-3 flex items-center justify-center min-h-[300px] select-none">
+                  <div className="relative inline-block overflow-hidden rounded-lg">
+                    <img
+                      ref={imgRef}
+                      src={uploadedFile.previewUrl}
+                      alt="Source Crop"
+                      className="max-h-[440px] w-auto object-contain rounded-lg block"
+                    />
+                    <div
+                      style={{
+                        left: `${cropBox.x}%`,
+                        top: `${cropBox.y}%`,
+                        width: `${cropBox.width}%`,
+                        height: `${cropBox.height}%`
+                      }}
+                      className="absolute border-2 border-indigo-400 bg-indigo-500/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none transition-all"
+                    >
+                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
+                        <div className="border-r border-b border-white/20" />
+                        <div className="border-r border-b border-white/20" />
+                        <div className="border-b border-white/20" />
+                        <div className="border-r border-b border-white/20" />
+                        <div className="border-r border-b border-white/20" />
+                        <div className="border-b border-white/20" />
+                        <div className="border-r border-b border-white/20" />
+                        <div className="border-r border-b border-white/20" />
+                        <div />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Action CTA */}

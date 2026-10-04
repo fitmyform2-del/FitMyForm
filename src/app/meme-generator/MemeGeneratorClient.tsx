@@ -8,14 +8,7 @@ import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { renderMemeCanvas } from '@/lib/image/editorTools';
 import { Smile, Download, Type, CheckCircle2, Image as ImageIcon } from 'lucide-react';
-
-const MEME_TEMPLATES = [
-  { name: 'Drake Hotline Bling', url: 'https://imgflip.com/s/meme/Drake-Hotline-Bling.jpg' },
-  { name: 'Distracted Boyfriend', url: 'https://imgflip.com/s/meme/Distracted-Boyfriend.jpg' },
-  { name: 'Two Buttons', url: 'https://imgflip.com/s/meme/Two-Buttons.jpg' },
-  { name: 'Change My Mind', url: 'https://imgflip.com/s/meme/Change-My-Mind.jpg' },
-  { name: 'Buff Doge vs Cheems', url: 'https://imgflip.com/s/meme/Buff-Doge-vs-Cheems.png' }
-];
+import { MEME_PRESETS, createPresetDataUrl } from './_components/memePresets';
 
 export default function MemeGeneratorClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -24,32 +17,21 @@ export default function MemeGeneratorClient() {
   const [fontSizeRatio, setFontSizeRatio] = useState(0.08);
   const [memeResultUrl, setMemeResultUrl] = useState<string | null>(null);
 
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
+  const loadPreset = (presetId: string, name: string) => {
+    const dataUrl = createPresetDataUrl(presetId);
+    setUploadedFile({
+      id: `preset-${Date.now()}`,
+      file: new File([], `${presetId}.jpg`, { type: 'image/jpeg' }),
+      type: 'image/jpeg',
+      previewUrl: dataUrl,
+      name: `${name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+      originalSizeKB: 40,
+      isPdf: false
+    });
   };
 
-  const loadTemplate = async (templateUrl: string, name: string) => {
-    try {
-      const resp = await fetch(templateUrl);
-      const blob = await resp.blob();
-      const file = new File([blob], `${name.toLowerCase().replace(/\s+/g, '-')}.jpg`, { type: 'image/jpeg' });
-      setUploadedFile({
-        id: `template-${Date.now()}`,
-        file,
-        type: 'image/jpeg',
-        previewUrl: URL.createObjectURL(blob),
-        name: file.name,
-        originalSizeKB: Math.round(blob.size / 1024),
-        isPdf: false
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const updateMemeCanvas = async () => {
+  const updateMemeCanvas = () => {
     if (!uploadedFile) return;
-
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -71,9 +53,7 @@ export default function MemeGeneratorClient() {
         if (active) updateMemeCanvas();
       }, 0);
     }
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [uploadedFile, topText, bottomText, fontSizeRatio]);
 
   return (
@@ -90,21 +70,22 @@ export default function MemeGeneratorClient() {
             Meme Generator <span className="gradient-text">Online</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
-            Create hilarious custom memes in seconds. Caption classic meme templates or upload your own pictures with high-impact text.
+            Create custom memes in seconds. Caption classic templates or upload your own pictures with multi-line Impact text.
           </p>
         </div>
 
         {/* Template Selector Strip */}
         <div className="bg-[#0d121e] border border-white/10 p-4 rounded-3xl space-y-3 shadow-xl">
           <label className="text-xs font-bold text-slate-300 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-indigo-400" /> Popular Meme Templates
+            <ImageIcon className="w-4 h-4 text-indigo-400" /> 1-Click Instant Meme Presets
           </label>
-          <div className="flex flex-wrap gap-3">
-            {MEME_TEMPLATES.map((tmpl) => (
+          <div className="flex flex-wrap gap-2.5">
+            {MEME_PRESETS.map((tmpl) => (
               <button
-                key={tmpl.name}
-                onClick={() => loadTemplate(tmpl.url, tmpl.name)}
-                className="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 hover:border-indigo-500 text-xs font-bold text-slate-200 transition-all flex items-center gap-2"
+                key={tmpl.id}
+                type="button"
+                onClick={() => loadPreset(tmpl.id, tmpl.name)}
+                className="px-3.5 py-2.5 min-h-[44px] rounded-xl bg-white/[0.04] hover:bg-indigo-600/30 border border-white/10 hover:border-indigo-500 text-xs font-bold text-slate-200 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <span>{tmpl.name}</span>
               </button>
@@ -115,12 +96,12 @@ export default function MemeGeneratorClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 space-y-6">
             {!uploadedFile ? (
-              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={handleFileUpload} onClearFile={() => setUploadedFile(null)} />
+              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={setUploadedFile} onClearFile={() => setUploadedFile(null)} />
             ) : (
               <div className="space-y-6 bg-[#0d121e] border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center justify-between">
                   <h3 className="font-extrabold text-white text-sm">Meme Caption Inputs</h3>
-                  <button onClick={() => setUploadedFile(null)} className="text-xs text-rose-400 hover:underline font-bold">
+                  <button onClick={() => setUploadedFile(null)} className="text-xs text-rose-400 hover:underline font-bold min-h-[44px]">
                     Upload Different Photo
                   </button>
                 </div>
@@ -135,7 +116,7 @@ export default function MemeGeneratorClient() {
                       value={topText}
                       onChange={(e) => setTopText(e.target.value)}
                       placeholder="TOP TEXT..."
-                      className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-white font-black text-sm uppercase focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-3 min-h-[44px] rounded-2xl bg-white/[0.04] border border-white/10 text-white font-black text-sm uppercase focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -148,7 +129,7 @@ export default function MemeGeneratorClient() {
                       value={bottomText}
                       onChange={(e) => setBottomText(e.target.value)}
                       placeholder="BOTTOM TEXT..."
-                      className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-white font-black text-sm uppercase focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-3 min-h-[44px] rounded-2xl bg-white/[0.04] border border-white/10 text-white font-black text-sm uppercase focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
@@ -164,7 +145,7 @@ export default function MemeGeneratorClient() {
                       step="0.01"
                       value={fontSizeRatio}
                       onChange={(e) => setFontSizeRatio(Number(e.target.value))}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -187,7 +168,7 @@ export default function MemeGeneratorClient() {
                 <a
                   href={memeResultUrl}
                   download={`meme-${uploadedFile?.name || 'custom.jpg'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Meme</span>

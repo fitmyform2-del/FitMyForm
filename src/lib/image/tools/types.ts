@@ -21,10 +21,11 @@ export interface WatermarkOptions {
 }
 
 export interface BlurBox {
+  id?: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  type: 'pixelate' | 'gaussian';
+  type: 'pixelate' | 'gaussian' | 'censor';
   intensity: number;
 }

@@ -7,11 +7,10 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { watermarkImageCanvas, WatermarkOptions } from '@/lib/image/editorTools';
-import { Shield, Download, RefreshCw, CheckCircle2, Type, Sliders } from 'lucide-react';
+import { Shield, Download, CheckCircle2, Type } from 'lucide-react';
 
 export default function WatermarkImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-
   const [options, setOptions] = useState<WatermarkOptions>({
     type: 'text',
     text: 'CONFIDENTIAL',
@@ -21,19 +20,10 @@ export default function WatermarkImageClient() {
     fontColor: '#ffffff',
     position: 'tile'
   });
-
   const [watermarkedUrl, setWatermarkedUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
-    setWatermarkedUrl(null);
-  };
 
   const generateWatermark = async () => {
     if (!uploadedFile) return;
-    setIsProcessing(true);
-
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -49,26 +39,18 @@ export default function WatermarkImageClient() {
           if (watermarkedUrl) URL.revokeObjectURL(watermarkedUrl);
           setWatermarkedUrl(URL.createObjectURL(blob));
         }
-        setIsProcessing(false);
       }, uploadedFile.file.type || 'image/jpeg', 0.95);
     } catch (err) {
       console.error(err);
-      setIsProcessing(false);
     }
   };
 
   useEffect(() => {
     let active = true;
     if (uploadedFile) {
-      setTimeout(() => {
-        if (active) {
-          generateWatermark();
-        }
-      }, 0);
+      setTimeout(() => { if (active) generateWatermark(); }, 0);
     }
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [uploadedFile, options]);
 
   return (
@@ -85,24 +67,23 @@ export default function WatermarkImageClient() {
             Watermark <span className="gradient-text">IMAGE</span> Online
           </h1>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
-            Stamp custom text or PNG logo watermark over your images in seconds. Control transparency, typography, font size, angle, and repeat tiling.
+            Stamp custom text or repeated tile watermark over your photos with custom opacity, angle, and typography.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 space-y-6">
             {!uploadedFile ? (
-              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={handleFileUpload} onClearFile={() => setUploadedFile(null)} />
+              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={setUploadedFile} onClearFile={() => setUploadedFile(null)} />
             ) : (
               <div className="space-y-6 bg-[#0d121e] border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-white text-sm">Watermark Configuration Settings</h3>
-                  <button onClick={() => setUploadedFile(null)} className="text-xs text-rose-400 hover:underline font-bold">
+                  <h3 className="font-extrabold text-white text-sm">Watermark Settings</h3>
+                  <button onClick={() => setUploadedFile(null)} className="text-xs text-rose-400 hover:underline font-bold min-h-[44px]">
                     Change Image
                   </button>
                 </div>
 
-                {/* Watermark Text Input */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                     <Type className="w-4 h-4 text-indigo-400" /> Watermark Text
@@ -111,12 +92,11 @@ export default function WatermarkImageClient() {
                     type="text"
                     value={options.text || ''}
                     onChange={(e) => setOptions({ ...options, text: e.target.value })}
-                    placeholder="e.g. SAMPLE / FOR SSC EXAM ONLY"
-                    className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 font-bold"
+                    placeholder="e.g. SAMPLE / FOR EXAM APPLICATION ONLY"
+                    className="w-full px-4 py-3 min-h-[44px] rounded-2xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 font-bold"
                   />
                 </div>
 
-                {/* Controls Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-slate-300">
@@ -130,7 +110,7 @@ export default function WatermarkImageClient() {
                       step="0.05"
                       value={options.opacity}
                       onChange={(e) => setOptions({ ...options, opacity: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500 cursor-pointer"
                     />
                   </div>
 
@@ -145,14 +125,14 @@ export default function WatermarkImageClient() {
                       max="90"
                       value={options.rotation}
                       onChange={(e) => setOptions({ ...options, rotation: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500 cursor-pointer"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs font-bold text-slate-300">
                       <span>Font Size</span>
-                      <span>{options.fontSize} px</span>
+                      <span>{options.fontSize}px</span>
                     </div>
                     <input
                       type="range"
@@ -160,7 +140,7 @@ export default function WatermarkImageClient() {
                       max="120"
                       value={options.fontSize}
                       onChange={(e) => setOptions({ ...options, fontSize: Number(e.target.value) })}
-                      className="w-full accent-indigo-500"
+                      className="w-full min-h-[44px] accent-indigo-500 cursor-pointer"
                     />
                   </div>
 
@@ -169,7 +149,7 @@ export default function WatermarkImageClient() {
                     <select
                       value={options.position}
                       onChange={(e) => setOptions({ ...options, position: e.target.value as WatermarkOptions['position'] })}
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none"
+                      className="w-full px-3 py-2 min-h-[44px] rounded-xl bg-white/[0.04] border border-white/10 text-white text-xs font-bold focus:outline-none"
                     >
                       <option value="tile">Repeat Tile Grid</option>
                       <option value="center">Center</option>
@@ -197,7 +177,7 @@ export default function WatermarkImageClient() {
           <div className="lg:col-span-5 space-y-6">
             <h2 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Watermarked Result Preview</span>
+              <span>Watermarked Preview</span>
             </h2>
 
             {watermarkedUrl ? (
@@ -209,7 +189,7 @@ export default function WatermarkImageClient() {
                 <a
                   href={watermarkedUrl}
                   download={`watermarked-${uploadedFile?.name || 'photo.jpg'}`}
-                  className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
+                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
                 >
                   <Download className="w-5 h-5" />
                   <span>Download Watermarked Photo</span>
@@ -219,7 +199,7 @@ export default function WatermarkImageClient() {
               <div className="bg-[#0d121e] border border-white/10 border-dashed rounded-3xl p-10 text-center text-slate-400 space-y-3">
                 <Shield className="w-8 h-8 text-indigo-400 mx-auto" />
                 <h4 className="font-extrabold text-white text-base">Watermark Preview</h4>
-                <p className="text-xs text-slate-400">Upload your photo on the left to apply live custom text watermarking.</p>
+                <p className="text-xs text-slate-400">Upload your photo to apply live custom text watermarking.</p>
               </div>
             )}
           </div>
@@ -227,7 +207,7 @@ export default function WatermarkImageClient() {
 
         <SeoContentSection
           title="Protect Your Photos and Documents with Custom Watermarks"
-          description="Watermarking images prevents unauthorized copying and protects sensitive document submissions (Aadhaar cards, exam forms, certificates) by stamping usage notes such as 'FOR EXAM APPLICATION ONLY'."
+          description="Watermarking images prevents unauthorized copying and protects sensitive document submissions by stamping usage notes like 'FOR EXAM APPLICATION ONLY'."
           faqs={[
             {
               question: 'Why should I watermark documents before submitting online?',

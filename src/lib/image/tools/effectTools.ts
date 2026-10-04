@@ -117,37 +117,52 @@ export function blurRegionsCanvas(
   for (const box of boxes) {
     if (box.width <= 0 || box.height <= 0) continue;
 
-    if (box.type === 'pixelate') {
-      const sampleSize = Math.max(4, Math.floor(box.intensity));
-      const tempCanvas = document.createElement('canvas');
-      const smallWidth = Math.max(1, Math.floor(box.width / sampleSize));
-      const smallHeight = Math.max(1, Math.floor(box.height / sampleSize));
+    const x = Math.max(0, Math.min(Math.round(box.x), canvas.width - 1));
+    const y = Math.max(0, Math.min(Math.round(box.y), canvas.height - 1));
+    const w = Math.min(Math.round(box.width), canvas.width - x);
+    const h = Math.min(Math.round(box.height), canvas.height - y);
+    if (w <= 0 || h <= 0) continue;
 
-      tempCanvas.width = smallWidth;
-      tempCanvas.height = smallHeight;
+    if (box.type === 'censor') {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(x, y, w, h);
+    } else if (box.type === 'pixelate') {
+      const sampleSize = Math.max(4, Math.floor(box.intensity || 14));
+      const smallW = Math.max(1, Math.floor(w / sampleSize));
+      const smallH = Math.max(1, Math.floor(h / sampleSize));
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = smallW;
+      tempCanvas.height = smallH;
       const tempCtx = tempCanvas.getContext('2d')!;
 
-      tempCtx.drawImage(
-        canvas,
-        box.x, box.y, box.width, box.height,
-        0, 0, smallWidth, smallHeight
-      );
+      tempCtx.drawImage(canvas, x, y, w, h, 0, 0, smallW, smallH);
 
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(
-        tempCanvas,
-        0, 0, smallWidth, smallHeight,
-        box.x, box.y, box.width, box.height
-      );
+      ctx.drawImage(tempCanvas, 0, 0, smallW, smallH, x, y, w, h);
       ctx.imageSmoothingEnabled = true;
     } else {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(box.x, box.y, box.width, box.height);
-      ctx.clip();
-      ctx.filter = `blur(${Math.max(2, box.intensity)}px)`;
-      ctx.drawImage(img, 0, 0);
-      ctx.restore();
+      const blurRadius = Math.max(4, Math.floor(box.intensity || 16));
+      const bleed = Math.min(blurRadius * 2, 40);
+      const bx = Math.max(0, x - bleed);
+      const by = Math.max(0, y - bleed);
+      const bw = Math.min(canvas.width - bx, w + bleed * 2);
+      const bh = Math.min(canvas.height - by, h + bleed * 2);
+
+      const subCanvas = document.createElement('canvas');
+      subCanvas.width = bw;
+      subCanvas.height = bh;
+      const subCtx = subCanvas.getContext('2d')!;
+      subCtx.drawImage(canvas, bx, by, bw, bh, 0, 0, bw, bh);
+
+      const blurredCanvas = document.createElement('canvas');
+      blurredCanvas.width = bw;
+      blurredCanvas.height = bh;
+      const blurredCtx = blurredCanvas.getContext('2d')!;
+      blurredCtx.filter = `blur(${blurRadius}px)`;
+      blurredCtx.drawImage(subCanvas, 0, 0);
+
+      ctx.drawImage(blurredCanvas, x - bx, y - by, w, h, x, y, w, h);
     }
   }
 
@@ -155,7 +170,7 @@ export function blurRegionsCanvas(
 }
 
 /**
- * Render Meme with Impact text, black outline stroke & upper case styling
+ * Render Meme with Impact text, black outline stroke, multi-line wrap & upper case styling
  */
 export function renderMemeCanvas(
   img: HTMLImageElement,
@@ -177,19 +192,50 @@ export function renderMemeCanvas(
   ctx.lineWidth = Math.max(3, Math.floor(fontSize / 8));
   ctx.textAlign = 'center';
 
+  const maxW = canvas.width * 0.9;
+  const lineHeight = fontSize * 1.15;
+
   if (topText.trim()) {
     ctx.textBaseline = 'top';
-    const textUpper = topText.toUpperCase();
-    ctx.strokeText(textUpper, canvas.width / 2, 20);
-    ctx.fillText(textUpper, canvas.width / 2, 20);
+    wrapMemeText(ctx, topText, canvas.width / 2, 20, maxW, lineHeight, false);
   }
 
   if (bottomText.trim()) {
     ctx.textBaseline = 'bottom';
-    const textUpper = bottomText.toUpperCase();
-    ctx.strokeText(textUpper, canvas.width / 2, canvas.height - 20);
-    ctx.fillText(textUpper, canvas.width / 2, canvas.height - 20);
+    wrapMemeText(ctx, bottomText, canvas.width / 2, canvas.height - 20, maxW, lineHeight, true);
   }
 
   return canvas;
+}
+
+function wrapMemeText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  isBottom: boolean
+) {
+  const words = text.toUpperCase().split(' ');
+  const lines: string[] = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const testLine = `${currentLine} ${words[i]}`;
+    if (ctx.measureText(testLine).width < maxWidth) {
+      currentLine = testLine;
+    } else {
+      lines.push(currentLine);
+      currentLine = words[i];
+    }
+  }
+  lines.push(currentLine);
+
+  const startY = isBottom ? y - (lines.length - 1) * lineHeight : y;
+  lines.forEach((line, index) => {
+    const lineY = startY + index * lineHeight;
+    ctx.strokeText(line, x, lineY);
+    ctx.fillText(line, x, lineY);
+  });
 }
