@@ -12,6 +12,22 @@ export type FileFormat = 'JPG' | 'JPEG' | 'PNG' | 'PDF' | 'WEBP';
 
 export type CropMode = 'fit' | 'fill' | 'center' | 'manual' | 'stretch';
 
+export interface PhotoStampConfig {
+  enabled: boolean;
+  name?: string;
+  date?: string;
+  position?: 'bottom' | 'top';
+  bgColor?: string;
+  textColor?: string;
+}
+
+export interface SignatureFilterConfig {
+  enabled: boolean;
+  whitenBackground: boolean;
+  inkBoost: boolean;
+  threshold?: number;
+}
+
 export interface DocumentRequirements {
   documentType: DocumentType;
   width?: number; // target width in px
@@ -27,6 +43,8 @@ export interface DocumentRequirements {
   dpi?: number; // e.g. 200 or 300
   bgColor?: string; // e.g. '#FFFFFF'
   cropMode: CropMode;
+  photoStamp?: PhotoStampConfig;
+  signatureFilter?: SignatureFilterConfig;
 }
 
 export interface UploadedFile {

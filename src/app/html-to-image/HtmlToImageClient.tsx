@@ -19,14 +19,24 @@ export default function HtmlToImageClient() {
   const [htmlContent, setHtmlContent] = useState(DEFAULT_HTML);
   const [canvasWidth, setCanvasWidth] = useState(800);
   const [canvasHeight, setCanvasHeight] = useState(450);
+  const [wStr, setWStr] = useState('800');
+  const [hStr, setHStr] = useState('450');
   const [bgColor, setBgColor] = useState('#0d121e');
   const [renderedUrl, setRenderedUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const processRender = async () => {
     setIsProcessing(true);
+    const parsedW = parseInt(wStr, 10);
+    const parsedH = parseInt(hStr, 10);
+    const finalW = isNaN(parsedW) || parsedW < 50 ? 800 : parsedW;
+    const finalH = isNaN(parsedH) || parsedH < 50 ? 450 : parsedH;
+    setCanvasWidth(finalW);
+    setCanvasHeight(finalH);
+    setWStr(String(finalW));
+    setHStr(String(finalH));
     try {
-      const canvas = await renderHtmlToCanvas(htmlContent, canvasWidth, canvasHeight, bgColor);
+      const canvas = await renderHtmlToCanvas(htmlContent, finalW, finalH, bgColor);
       canvas.toBlob((blob) => {
         if (blob) {
           if (renderedUrl) URL.revokeObjectURL(renderedUrl);
@@ -88,19 +98,37 @@ export default function HtmlToImageClient() {
                 <div>
                   <label className="font-bold text-slate-300 block mb-1">Canvas Width</label>
                   <input
-                    type="number"
-                    value={canvasWidth}
-                    onChange={(e) => setCanvasWidth(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={wStr}
+                    onChange={(e) => setWStr(e.target.value.replace(/\D/g, ''))}
+                    onBlur={() => {
+                      const val = parseInt(wStr, 10);
+                      const v = isNaN(val) || val < 50 ? 800 : val;
+                      setCanvasWidth(v);
+                      setWStr(String(v));
+                    }}
+                    placeholder="800"
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="font-bold text-slate-300 block mb-1">Canvas Height</label>
                   <input
-                    type="number"
-                    value={canvasHeight}
-                    onChange={(e) => setCanvasHeight(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={hStr}
+                    onChange={(e) => setHStr(e.target.value.replace(/\D/g, ''))}
+                    onBlur={() => {
+                      const val = parseInt(hStr, 10);
+                      const v = isNaN(val) || val < 50 ? 450 : val;
+                      setCanvasHeight(v);
+                      setHStr(String(v));
+                    }}
+                    placeholder="450"
+                    className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white font-mono focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>

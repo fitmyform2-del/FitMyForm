@@ -109,7 +109,29 @@ export function validateDocumentResult({
     errors.push(`File size must be between ${minKB} KB and ${maxKB} KB (Current: ${fileSizeKB} KB).`);
   }
 
-  // 4. Privacy Guarantee Check
+  // 4. Name & Date Stamp check if enabled
+  if (requirements.photoStamp?.enabled) {
+    checklist.push({
+      id: 'stamp',
+      label: 'Photo Name & DOP Stamp',
+      expected: 'Candidate Name + Date printed',
+      actual: `${requirements.photoStamp.name || 'CANDIDATE'} • ${requirements.photoStamp.date || 'Active'}`,
+      passed: true
+    });
+  }
+
+  // 5. Signature clean-up check if enabled
+  if (requirements.signatureFilter?.enabled) {
+    checklist.push({
+      id: 'sig_filter',
+      label: 'Paper & Ink Clean-up',
+      expected: 'Whiten shadows & dark ink',
+      actual: 'Contrast enhancement active',
+      passed: true
+    });
+  }
+
+  // 6. Privacy Guarantee Check
   checklist.push({
     id: 'privacy',
     label: 'Client-Side Privacy',

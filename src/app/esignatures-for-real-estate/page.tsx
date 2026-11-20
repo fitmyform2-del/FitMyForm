@@ -68,7 +68,7 @@ export default function RealEstateEsignaturePage() {
 
         <SeoContentSection
           title="Streamline Property Management & Agent Sales Workflow"
-          description="FitMyForm iLoveSign suite eliminates missing signatures and speeds up property closings."
+          description="FitMyForm e-Sign suite eliminates missing signatures and speeds up property closings."
           faqs={[
             {
               question: 'Can tenants sign lease agreements on mobile phones?',

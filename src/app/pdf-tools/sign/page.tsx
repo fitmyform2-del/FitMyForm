@@ -84,7 +84,7 @@ export default function SignPdfPage() {
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
             <PenTool className="w-4 h-4 text-indigo-400" />
-            <span>iLoveSign PDF e-Sign Workspace</span>
+            <span>PDF e-Sign Workspace</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
             e-Sign <span className="gradient-text">PDF</span> Documents
@@ -206,7 +206,7 @@ export default function SignPdfPage() {
         </div>
 
         <SeoContentSection
-          title="iLoveSign Client-Side Free PDF e-Signature Tool"
+          title="Free Client-Side PDF e-Signature Tool"
           description="Sign PDF contracts, agreements, NDAs, and forms with full eIDAS & ESIGN Act compliance directly in your browser. Generate cryptographic audit trail certificates without server uploads."
           faqs={[
             {

@@ -7,7 +7,7 @@ import { ShieldCheck, Lock, Key, FileCheck, CheckCircle2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignature Security & Data Protection Architecture',
-  description: 'Discover FitMyForm iLoveSign security standards: client-side zero-trust architecture, SHA-256 document hashing, and ISO 27001 compliance.',
+  description: 'Discover FitMyForm e-signature security standards: client-side zero-trust architecture, SHA-256 document hashing, and ISO 27001 compliance.',
   keywords: ['esignature security', 'secure pdf signing', 'client side esign security', 'zero server upload signature', 'sha256 pdf verification'],
   alternates: { canonical: '/esignature-security' }
 };

@@ -1,4 +1,6 @@
 import { DocumentRequirements, CropRect } from '@/types/document';
+import { applyPhotoStamp } from './tools/stampTools';
+import { applySignatureFilter } from './tools/signatureTools';
 
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -55,6 +57,9 @@ export function renderToCanvas(
       -targetW / 2 * scale, -targetH / 2 * scale, targetW * scale, targetH * scale
     );
     ctx.restore();
+
+    if (reqs.signatureFilter?.enabled) applySignatureFilter(canvas, reqs.signatureFilter);
+    if (reqs.photoStamp?.enabled) applyPhotoStamp(canvas, reqs.photoStamp);
     return canvas;
   }
 
@@ -107,6 +112,14 @@ export function renderToCanvas(
     }
 
     ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+  }
+
+  if (reqs.signatureFilter?.enabled) {
+    applySignatureFilter(canvas, reqs.signatureFilter);
+  }
+
+  if (reqs.photoStamp?.enabled) {
+    applyPhotoStamp(canvas, reqs.photoStamp);
   }
 
   return canvas;

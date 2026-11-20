@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { UploadCloud, File, Image as ImageIcon, Camera, RefreshCw, AlertCircle, Shield, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, File, Image as ImageIcon, Camera, RefreshCw, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react';
 import { UploadedFile } from '@/types/document';
 import { CameraCaptureModal } from '../camera/CameraCaptureModal';
 
@@ -9,12 +9,14 @@ interface DropzoneUploadProps {
   uploadedFile: UploadedFile | null;
   onFileUpload: (uploaded: UploadedFile) => void;
   onClearFile: () => void;
+  acceptLabel?: string;
 }
 
 export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
   uploadedFile,
   onFileUpload,
-  onClearFile
+  onClearFile,
+  acceptLabel = 'JPG, PNG, WEBP, or PDF'
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -33,7 +35,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
 
     if (isPdf) {
       onFileUpload({
-        id: Date.now().toString(),
+        id: `pdf-${Date.now()}`,
         file,
         name: file.name,
         originalSizeKB,
@@ -49,7 +51,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
 
     img.onload = () => {
       onFileUpload({
-        id: Date.now().toString(),
+        id: `img-${Date.now()}`,
         file,
         name: file.name,
         originalSizeKB,
@@ -90,72 +92,66 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
             setIsDragging(false);
             if (e.dataTransfer.files?.[0]) processSelectedFile(e.dataTransfer.files[0]);
           }}
-          className={`relative border-2 border-dashed rounded-3xl p-6 sm:p-10 text-center transition-all duration-300 group cursor-pointer ${
-            isDragging
-              ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01] shadow-2xl shadow-indigo-500/20'
-              : 'border-white/15 hover:border-indigo-500/50 bg-[#0d121e]/80 hover:bg-[#0d121e] shadow-xl'
+          className={`fmf-dropzone rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer ${
+            isDragging ? 'fmf-dropzone-active border-blue-500 scale-[1.01]' : ''
           }`}
+          onClick={() => inputRef.current?.click()}
         >
-          <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300 shadow-inner">
-            <UploadCloud className="w-8 h-8 text-indigo-400 group-hover:text-indigo-300" />
+          <div className="w-20 h-20 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-5 shadow-inner">
+            <UploadCloud className="w-10 h-10 text-blue-400" />
           </div>
 
-          <h3 className="text-lg font-black text-white mb-1 tracking-tight">
-            Drag & Drop your photo or document here
+          <h3 className="text-xl sm:text-2xl font-black text-white mb-2 tracking-tight">
+            Drop your image here
           </h3>
-          <p className="text-xs text-slate-400 mb-6 max-w-sm mx-auto leading-relaxed">
-            Passport Photos, Signatures, Thumb Impressions, Certificates (JPG, PNG, WEBP, PDF).
+          <p className="text-xs sm:text-sm text-slate-400 mb-6 max-w-sm mx-auto">
+            {acceptLabel} (Max 25 MB)
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="px-5 py-2.5 min-h-[44px] bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/25 flex items-center gap-2 transition-all transform hover:scale-[1.02] cursor-pointer"
+              className="fmf-btn-primary px-8 py-3.5 text-sm sm:text-base font-black flex items-center gap-2.5 cursor-pointer"
             >
-              <ImageIcon className="w-4 h-4" />
-              <span>Select File from Device</span>
+              <ImageIcon className="w-5 h-5" />
+              <span>Select images</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsCameraOpen(true)}
-              className="px-5 py-2.5 min-h-[44px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-amber-500/25 flex items-center gap-2 transition-all transform hover:scale-[1.02] cursor-pointer"
+              className="fmf-btn-secondary px-5 py-3.5 text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer"
             >
-              <Camera className="w-4 h-4" />
-              <span>Capture Photo via Camera</span>
+              <Camera className="w-4 h-4 text-amber-400" />
+              <span>Use Camera</span>
             </button>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-4 text-[11px] text-slate-400 font-medium">
-            <span className="flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-emerald-400" /> Max file size: 25 MB
-            </span>
-            <span>•</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 100% Browser In-Memory Processing
-            </span>
+          <div className="mt-8 pt-6 border-t border-white/[0.06] flex items-center justify-center gap-2 text-xs text-emerald-400 font-semibold">
+            <ShieldCheck className="w-4 h-4" />
+            <span>100% Client-Side Privacy • No Files Uploaded to Any Server</span>
           </div>
         </div>
       ) : (
-        <div className="bg-[#0d121e] border border-indigo-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 animate-fade-in relative overflow-hidden">
-          <div className="flex items-start justify-between gap-4 relative z-10">
+        <div className="fmf-panel p-5 sm:p-6 space-y-4">
+          <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4 overflow-hidden">
-              <div className="w-16 h-16 rounded-2xl bg-[#080b11] border border-white/15 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+              <div className="w-16 h-16 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                 {uploadedFile.isPdf ? (
                   <File className="w-8 h-8 text-amber-400" />
                 ) : (
-                  <img src={uploadedFile.previewUrl} alt="Source Preview" className="w-full h-full object-cover" />
+                  <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-full object-cover" />
                 )}
               </div>
 
               <div className="overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black tracking-wider uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-md font-mono">
-                    {uploadedFile.isPdf ? 'PDF Document' : uploadedFile.type.replace('image/', '').toUpperCase()}
+                  <span className="text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded font-mono">
+                    {uploadedFile.isPdf ? 'PDF' : uploadedFile.type.replace('image/', '').toUpperCase()}
                   </span>
-                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Ready
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
+                    Ready
                   </span>
                 </div>
                 <h4 className="font-bold text-white text-sm truncate max-w-xs sm:max-w-md mt-1">
@@ -163,39 +159,28 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
                 </h4>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 mt-1">
                   <span>
-                    Original Size: <strong className="text-emerald-400 font-mono font-bold">{uploadedFile.originalSizeKB > 1024 ? `${(uploadedFile.originalSizeKB / 1024).toFixed(2)} MB` : `${uploadedFile.originalSizeKB} KB`}</strong>
+                    Size: <strong className="text-emerald-400 font-mono">{uploadedFile.originalSizeKB > 1024 ? `${(uploadedFile.originalSizeKB / 1024).toFixed(2)} MB` : `${uploadedFile.originalSizeKB} KB`}</strong>
                   </span>
                   {uploadedFile.width && uploadedFile.height && (
                     <span>
-                      • Dimensions: <strong className="text-indigo-300 font-mono font-bold">{uploadedFile.width} × {uploadedFile.height} px</strong>
+                      • <strong className="text-blue-300 font-mono">{uploadedFile.width} × {uploadedFile.height} px</strong>
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsCameraOpen(true)}
-                className="px-3 py-2 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <Camera className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Camera</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  onClearFile();
-                  if (inputRef.current) inputRef.current.value = '';
-                }}
-                className="px-3.5 py-2 min-h-[44px] bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 border border-white/10 transition-all cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Change File</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onClearFile();
+                if (inputRef.current) inputRef.current.value = '';
+              }}
+              className="fmf-btn-secondary px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
+              <span>Change</span>
+            </button>
           </div>
         </div>
       )}

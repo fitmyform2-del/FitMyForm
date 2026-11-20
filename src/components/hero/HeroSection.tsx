@@ -12,7 +12,7 @@ export const HeroSection: React.FC = () => {
         <span>100% Free • In-Browser Processing • Official 2025–2026 Portal Standards</span>
       </div>
 
-      {/* Main Title (iLove Style) */}
+      {/* Main Title */}
       <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.15]">
         Every tool you could want to <span className="gradient-text">edit images</span> & format exam documents
       </h1>

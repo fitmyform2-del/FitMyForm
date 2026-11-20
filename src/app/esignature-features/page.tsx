@@ -7,7 +7,7 @@ import { PenTool, ShieldCheck, Zap, Layers, ArrowRight, CheckCircle2, FileText, 
 
 export const metadata: Metadata = {
   title: 'eSignature Features - Fast, Secure & Free PDF Signing Platform',
-  description: 'Explore FitMyForm iLoveSign e-signature features. Draw, type, or upload signatures, place initials, full names, and date fields with zero server uploads.',
+  description: 'Explore FitMyForm e-signature features. Draw, type, or upload signatures, place initials, full names, and date fields with zero server uploads.',
   keywords: ['esignature features', 'electronic signature features', 'sign pdf features', 'client side esign', 'audit trail certificate'],
   alternates: { canonical: '/esignature-features' }
 };
@@ -86,7 +86,7 @@ export default function EsignatureFeaturesPage() {
 
         <SeoContentSection
           title="Streamline Business Agreements with Digital e-Signatures"
-          description="Electronic signatures replace paper printing, physical courier mailing, and manual scanning. FitMyForm iLoveSign suite empowers teams to seal contracts in seconds."
+          description="Electronic signatures replace paper printing, physical courier mailing, and manual scanning. FitMyForm e-Sign suite empowers teams to seal contracts in seconds."
           faqs={[
             {
               question: 'Do I need to create an account to sign PDFs?',

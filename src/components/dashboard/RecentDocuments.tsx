@@ -22,20 +22,20 @@ export const RecentDocuments: React.FC = () => {
   if (history.length === 0) return null;
 
   return (
-    <div className="glass-panel-antigravity rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
-        <h4 className="font-black text-sm text-white flex items-center gap-2.5 tracking-tight">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shadow-inner">
-            <Clock className="w-4 h-4 text-cyan-400" />
+    <div className="fmf-panel p-5 sm:p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+        <h4 className="font-black text-sm text-white flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+            <Clock className="w-4 h-4 text-blue-400" />
           </div>
-          <span>Recent Formatted Sessions (Saved in Local Browser Storage)</span>
+          <span>Recent Sessions (Local Browser Storage)</span>
         </h4>
         <button
           onClick={handleClear}
-          className="text-xs font-bold text-slate-300 hover:text-rose-400 flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/10 transition-all cursor-pointer"
+          className="text-xs font-bold text-slate-300 hover:text-rose-400 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-all cursor-pointer"
         >
-          <Trash2 className="w-4 h-4" />
-          <span>Clear History</span>
+          <Trash2 className="w-3.5 h-3.5" />
+          <span>Clear</span>
         </button>
       </div>
 
@@ -43,14 +43,14 @@ export const RecentDocuments: React.FC = () => {
         {history.map((item) => (
           <div
             key={item.id}
-            className="antigravity-card-3d rounded-2xl p-4 flex flex-col justify-between space-y-3 cursor-pointer group"
+            className="fmf-card p-4 flex flex-col justify-between space-y-3"
           >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-extrabold text-xs text-white truncate max-w-[160px] group-hover:text-indigo-300 transition-colors">
+                <span className="font-extrabold text-xs text-white truncate max-w-[160px]">
                   {item.fileName}
                 </span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono font-bold px-2 py-0.5 rounded-md border border-emerald-500/30">
+                <span className="text-[10px] bg-blue-500/20 text-blue-300 font-mono font-bold px-2 py-0.5 rounded border border-blue-500/30">
                   {item.format}
                 </span>
               </div>
@@ -61,10 +61,10 @@ export const RecentDocuments: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between border-t border-white/10 pt-2">
+            <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between border-t border-white/[0.08] pt-2">
               <span>{item.timestamp}</span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> Private
+                <ShieldCheck className="w-3.5 h-3.5" /> 100% Private
               </span>
             </div>
           </div>

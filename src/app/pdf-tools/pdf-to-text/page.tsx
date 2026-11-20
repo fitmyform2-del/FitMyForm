@@ -31,7 +31,7 @@ export default function PdfToTextPage() {
 
       // Basic text preview title metadata string
       const textHeader = `--- FITMYFORM TEXT EXTRACTION ---\nDocument: ${file.name}\nTotal Pages: ${pages}\n\n`;
-      let textBody = `[Page 1 to Page ${pages}]\nContent extracted client-side from ${file.name}.\nReady for copying, plain text export, and Markdown editing.`;
+      const textBody = `[Page 1 to Page ${pages}]\nContent extracted client-side from ${file.name}.\nReady for copying, plain text export, and Markdown editing.`;
 
       setExtractedText(textHeader + textBody);
     } catch (err) {

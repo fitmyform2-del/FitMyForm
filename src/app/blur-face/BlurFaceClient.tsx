@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { blurRegionsCanvas, BlurBox } from '@/lib/image/editorTools';
-import { EyeOff, Sparkles, RefreshCw } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
 import { BlurCanvasEditor } from './_components/BlurCanvasEditor';
 import { BlurControlsPanel } from './_components/BlurControlsPanel';
 import { BlurDownloadCard } from './_components/BlurDownloadCard';
@@ -23,7 +23,7 @@ export default function BlurFaceClient() {
 
   const handleFileUpload = (file: UploadedFile) => {
     setUploadedFile(file);
-    // Intelligent default face box
+    setBlurredResultUrl(null);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -47,6 +47,12 @@ export default function BlurFaceClient() {
     img.src = file.previewUrl;
   };
 
+  const handleClearFile = () => {
+    setUploadedFile(null);
+    setBlurredResultUrl(null);
+    setBoxes([]);
+  };
+
   const handleAddPreset = (type: 'face' | 'aadhaar') => {
     if (!uploadedFile) return;
     const img = new Image();
@@ -62,7 +68,6 @@ export default function BlurFaceClient() {
         const by = Math.round((h - bh) * 0.25);
         setBoxes((prev) => [...prev, { x: bx, y: by, width: bw, height: bh, type: 'pixelate', intensity: 14 }]);
       } else {
-        // Aadhaar number censor bar
         const bw = Math.round(w * 0.6);
         const bh = Math.round(h * 0.08);
         const bx = Math.round((w - bw) / 2);
@@ -85,14 +90,10 @@ export default function BlurFaceClient() {
     });
   };
 
-  // Recompute blurred canvas whenever boxes or file change
   useEffect(() => {
-    let isCurrent = true;
-    if (!uploadedFile) {
-      setBlurredResultUrl(null);
-      return;
-    }
+    if (!uploadedFile) return;
 
+    let isCurrent = true;
     const timer = setTimeout(() => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -120,45 +121,42 @@ export default function BlurFaceClient() {
   }, [uploadedFile, boxes]);
 
   return (
-    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Hero Header */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
-            <EyeOff className="w-4 h-4 text-indigo-400" />
-            <span>Interactive Privacy Redaction</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-300 text-xs font-bold uppercase tracking-wider">
+            <EyeOff className="w-3.5 h-3.5 text-blue-400" />
+            <span>Privacy Redaction</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-            Blur Face & <span className="gradient-text">Censor Data</span>
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Blur Face & <span className="text-blue-400">Censor Data</span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
-            Click & drag to blur faces, hide Aadhaar numbers, and censor confidential details with pixelate, gaussian blur, or black redaction bars.
+          <p className="text-xs sm:text-sm md:text-base text-slate-300">
+            Click & drag to blur faces, hide Aadhaar numbers, and censor confidential details with pixelate or black bars.
           </p>
         </div>
 
-        {/* Upload or Editor Workspace */}
         {!uploadedFile ? (
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-2xl mx-auto">
             <DropzoneUpload
               uploadedFile={uploadedFile}
               onFileUpload={handleFileUpload}
-              onClearFile={() => setUploadedFile(null)}
+              onClearFile={handleClearFile}
             />
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Visual Canvas (Left Column) */}
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-extrabold text-white text-sm">Visual Photo Editor</h3>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Visual Stage</span>
                 <button
                   type="button"
-                  onClick={() => setUploadedFile(null)}
-                  className="text-xs text-rose-400 hover:underline font-bold min-h-[44px] cursor-pointer"
+                  onClick={handleClearFile}
+                  className="text-xs text-rose-400 hover:underline font-bold py-1 cursor-pointer"
                 >
-                  Upload Another Photo
+                  Change Image
                 </button>
               </div>
 
@@ -169,30 +167,35 @@ export default function BlurFaceClient() {
                 activeMode={activeMode}
                 activeIntensity={activeIntensity}
                 onSelectBox={setSelectedBoxIndex}
-                onAddBox={(newBox) => {
-                  setBoxes((prev) => [...prev, newBox]);
+                onAddBox={(box) => {
+                  setBoxes((prev) => [...prev, box]);
                   setSelectedBoxIndex(boxes.length);
                 }}
                 onRemoveBox={(idx) => {
                   setBoxes((prev) => prev.filter((_, i) => i !== idx));
-                  setSelectedBoxIndex(null);
+                  if (selectedBoxIndex === idx) setSelectedBoxIndex(null);
                 }}
               />
             </div>
 
-            {/* Sidebar Controls + Download Preview (Right Column) */}
             <div className="lg:col-span-5 space-y-6">
               <BlurControlsPanel
                 boxes={boxes}
                 selectedBoxIndex={selectedBoxIndex}
                 activeMode={activeMode}
                 activeIntensity={activeIntensity}
-                onSetMode={setActiveMode}
-                onSetIntensity={setActiveIntensity}
+                onSetMode={(m) => {
+                  setActiveMode(m);
+                  handleUpdateActiveBox({ type: m });
+                }}
+                onSetIntensity={(val) => {
+                  setActiveIntensity(val);
+                  handleUpdateActiveBox({ intensity: val });
+                }}
                 onSelectBox={setSelectedBoxIndex}
                 onRemoveBox={(idx) => {
                   setBoxes((prev) => prev.filter((_, i) => i !== idx));
-                  setSelectedBoxIndex(null);
+                  if (selectedBoxIndex === idx) setSelectedBoxIndex(null);
                 }}
                 onClearBoxes={() => {
                   setBoxes([]);
@@ -204,7 +207,7 @@ export default function BlurFaceClient() {
 
               <BlurDownloadCard
                 blurredUrl={blurredResultUrl}
-                fileName={uploadedFile.name}
+                fileName={`censored-${uploadedFile.name}`}
                 isProcessing={isProcessing}
               />
             </div>
@@ -212,16 +215,12 @@ export default function BlurFaceClient() {
         )}
 
         <SeoContentSection
-          title="Protect Personal Information & Blur Faces in Photos Online"
-          description="FitMyForm's privacy blur tool allows you to visually censor faces, license plates, Aadhaar numbers, and confidential details directly in your browser."
+          title="Blur Faces and Censor Private Information Online Free"
+          description="Protect sensitive identity proofs and blur faces directly in your browser. All blurring runs using HTML5 Canvas with zero uploads."
           faqs={[
             {
-              question: 'How do I blur a face or sensitive number?',
-              answer: 'Upload your photo, then simply click and drag your mouse or finger across the face or text you want to conceal. Choose between pixelate, gaussian blur, or black redaction bar.'
-            },
-            {
-              question: 'Is my photo private and secure?',
-              answer: 'Yes, 100%. All face blurring, pixelation, and censor bar applications happen locally in your web browser using HTML5 Canvas. Your photo is never transmitted to any external server.'
+              question: 'How do I mask my Aadhaar card number?',
+              answer: 'Click "+ Add Aadhaar Bar" preset to place a black censor rectangle over your 12-digit number.'
             }
           ]}
         />

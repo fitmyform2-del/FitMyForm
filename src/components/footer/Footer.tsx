@@ -28,11 +28,11 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* iLoveSign Suite Col */}
+          {/* e-Sign Suite Col */}
           <div className="space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
               <PenTool className="w-3.5 h-3.5 text-emerald-400" />
-              <span>iLoveSign Suite</span>
+              <span>e-Sign Suite</span>
             </h4>
             <ul className="space-y-2 text-xs">
               <li><Link href="/pdf-tools/sign" className="hover:text-white transition-colors py-1 inline-block">Fill & e-Sign PDF</Link></li>
@@ -101,7 +101,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright */}
         <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
-          <p>© {new Date().getFullYear()} FitMyForm iLoveIMG & iLoveSign Suite. Built for creators & professionals worldwide.</p>
+          <p>© {new Date().getFullYear()} FitMyForm Suite. Built for creators, students & professionals worldwide.</p>
           <p className="flex items-center gap-1">
             Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> for 100% Privacy & Fast Latency.
           </p>

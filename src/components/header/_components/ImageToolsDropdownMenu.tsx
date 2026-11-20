@@ -30,7 +30,7 @@ export function ImageToolsDropdownMenu({ isOpen, onToggle, onClose }: ImageTools
           <div className="px-3 py-2 text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-emerald-400" />
-              iLoveIMG Equivalent Suite
+              Image & Photo Studio
             </span>
             <span className="text-slate-500 font-mono text-[9px]">13+ Tools</span>
           </div>

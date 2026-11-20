@@ -5,6 +5,7 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { RequirementsForm } from '@/components/editor/RequirementsForm';
 import { ImageComparisonPreview } from '@/components/preview/ImageComparisonPreview';
 import { ValidationChecklist } from '@/components/validation/ValidationChecklist';
+import { PreUploadAuditCard } from '@/components/validation/PreUploadAuditCard';
 import { UploadedFile, DocumentRequirements, ProcessingResult } from '@/types/document';
 import { Sparkles, ArrowRight, RefreshCw, SlidersHorizontal, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -69,6 +70,12 @@ export function HomeExamWorkspace({
               onFileUpload={onFileUpload}
               onClearFile={onClearFile}
             />
+            {uploadedFile && (
+              <PreUploadAuditCard
+                uploadedFile={uploadedFile}
+                requirements={requirements}
+              />
+            )}
           </div>
 
           {/* Step 2: Form Specifications */}

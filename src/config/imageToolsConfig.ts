@@ -227,15 +227,21 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     seoTitle: 'Sign PDF Online Free - Add Signature to PDF Document',
     seoDescription: 'Fill and sign PDF documents online with 100% legal validity.',
     keywords: ['sign pdf online free', 'esign pdf document']
+  },
+  {
+    id: 'whiteboard',
+    name: 'Interactive Whiteboard',
+    route: '/whiteboard',
+    category: 'create',
+    description: 'Feature-rich offline whiteboard with freehand drawing, math formulas, rulers, protractor, timer, dice, and multi-page PDF export.',
+    shortDescription: 'Offline digital board & teaching studio',
+    badge: 'New',
+    iconName: 'Presentation',
+    seoTitle: 'Free Interactive Offline Whiteboard - Digital Teaching Studio',
+    seoDescription: 'Digital whiteboard with drawing, math symbols, sticky notes, classroom widgets, and multi-page PDF export.',
+    keywords: ['offline whiteboard', 'interactive whiteboard online', 'digital teaching board']
   }
 ];
 
-export const TOOL_CATEGORIES = [
-  { id: 'all', label: 'All Tools' },
-  { id: 'exam', label: 'Online Exam Resizers' },
-  { id: 'optimize', label: 'Compress & Resize' },
-  { id: 'edit', label: 'Crop & Edit' },
-  { id: 'convert', label: 'Convert' },
-  { id: 'pdf', label: 'PDF & e-Sign' },
-  { id: 'security', label: 'Security & Blur' }
-];
+export { TOOL_CATEGORIES } from './toolCategories';
+

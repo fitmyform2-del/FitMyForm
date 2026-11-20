@@ -1,223 +1,214 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
-import { Crop, Download, RefreshCw, CheckCircle2, ArrowRight } from 'lucide-react';
-import { CropControls } from './_components/CropControls';
+import { Crop, Download, CheckCircle2, RotateCcw } from 'lucide-react';
+import { CropStage } from './_components/CropStage';
+import { CropSidebar } from './_components/CropSidebar';
+import { CropBox } from './_components/cropMath';
 
 export default function CropImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [naturalDim, setNaturalDim] = useState({ width: 0, height: 0 });
+  const [cropBox, setCropBox] = useState<CropBox>({ x: 0, y: 0, width: 300, height: 300 });
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
-  const [cropBox, setCropBox] = useState({ x: 10, y: 10, width: 80, height: 80 });
+  const [outputFormat, setOutputFormat] = useState<'image/jpeg' | 'image/png' | 'image/webp'>('image/jpeg');
+  const [quality, setQuality] = useState(0.95);
   const [isProcessing, setIsProcessing] = useState(false);
   const [croppedResultUrl, setCroppedResultUrl] = useState<string | null>(null);
-  const [croppedDimensions, setCroppedDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [resultDim, setResultDim] = useState<{ width: number; height: number } | null>(null);
 
-  const imgRef = useRef<HTMLImageElement | null>(null);
-
-  const handleFileUpload = (file: UploadedFile) => {
-    setUploadedFile(file);
-    setCroppedResultUrl(null);
-    setCroppedDimensions(null);
+  const handleImageLoaded = (dim: { width: number; height: number }) => {
+    setNaturalDim(dim);
+    const w = Math.round(dim.width * 0.85);
+    const h = Math.round(dim.height * 0.85);
+    setCropBox({
+      width: w,
+      height: h,
+      x: Math.round((dim.width - w) / 2),
+      y: Math.round((dim.height - h) / 2),
+    });
   };
 
   const handleAspectChange = (ratio: number | null) => {
     setAspectRatio(ratio);
-    if (ratio !== null) {
-      const newHeight = Math.min(90, cropBox.width / ratio);
-      setCropBox((prev) => ({ ...prev, height: newHeight }));
+    if (!ratio || naturalDim.width === 0) return;
+    let w = Math.min(cropBox.width, naturalDim.width);
+    let h = Math.round(w / ratio);
+    if (h > naturalDim.height) {
+      h = Math.round(naturalDim.height * 0.9);
+      w = Math.round(h * ratio);
     }
+    const x = Math.max(0, Math.round((naturalDim.width - w) / 2));
+    const y = Math.max(0, Math.round((naturalDim.height - h) / 2));
+    setCropBox({ x, y, width: w, height: h });
+  };
+
+  const handleCenterCrop = () => {
+    if (naturalDim.width === 0) return;
+    const x = Math.max(0, Math.round((naturalDim.width - cropBox.width) / 2));
+    const y = Math.max(0, Math.round((naturalDim.height - cropBox.height) / 2));
+    setCropBox((prev) => ({ ...prev, x, y }));
   };
 
   const executeCrop = () => {
-    if (!uploadedFile || !imgRef.current) return;
+    if (!uploadedFile || naturalDim.width === 0) return;
     setIsProcessing(true);
 
-    const img = imgRef.current;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-
-    const actualX = (cropBox.x / 100) * img.naturalWidth;
-    const actualY = (cropBox.y / 100) * img.naturalHeight;
-    const actualW = (cropBox.width / 100) * img.naturalWidth;
-    const actualH = (cropBox.height / 100) * img.naturalHeight;
-
-    canvas.width = actualW;
-    canvas.height = actualH;
-
-    ctx.drawImage(
-      img,
-      actualX, actualY, actualW, actualH,
-      0, 0, actualW, actualH
-    );
-
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        setCroppedResultUrl(url);
-        setCroppedDimensions({ width: Math.round(actualW), height: Math.round(actualH) });
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = uploadedFile.previewUrl;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setIsProcessing(false);
+        return;
       }
-      setIsProcessing(false);
-    }, uploadedFile.file.type || 'image/jpeg', 0.95);
+
+      canvas.width = cropBox.width;
+      canvas.height = cropBox.height;
+
+      ctx.drawImage(
+        img,
+        cropBox.x, cropBox.y, cropBox.width, cropBox.height,
+        0, 0, cropBox.width, cropBox.height
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            setCroppedResultUrl(URL.createObjectURL(blob));
+            setResultDim({ width: cropBox.width, height: cropBox.height });
+          }
+          setIsProcessing(false);
+        },
+        outputFormat,
+        quality
+      );
+    };
   };
 
   return (
-    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Header Title */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
-            <Crop className="w-4 h-4 text-indigo-400" />
-            <span>Client-Side Visual Cropper</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-300 text-xs font-bold uppercase tracking-wider">
+            <Crop className="w-3.5 h-3.5 text-blue-400" />
+            <span>Visual Cropper</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white">
-            Crop <span className="gradient-text">IMAGE</span> Online
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Crop <span className="text-blue-400">IMAGE</span> Online
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
-            Crop JPG, PNG, WEBP, or GIF images with ease. Select pre-set aspect ratios (1:1, 16:9, 4:3) or crop custom pixel bounds with 100% privacy.
+          <p className="text-xs sm:text-sm md:text-base text-slate-300">
+            Drag to crop JPG, PNG, or WEBP images with preset aspect ratios (1:1, 16:9, Passport 3.5:4.5) with 100% browser privacy.
           </p>
         </div>
 
-        {/* Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Upload & Crop Controls (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            {!uploadedFile ? (
-              <DropzoneUpload uploadedFile={uploadedFile} onFileUpload={handleFileUpload} onClearFile={() => setUploadedFile(null)} />
-            ) : (
-              <div className="space-y-6 bg-[#0d121e] border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-2xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Crop className="w-5 h-5 text-indigo-400" />
-                    <h3 className="font-extrabold text-white text-sm">Visual Image Cropper Workspace</h3>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setUploadedFile(null);
-                      setCroppedResultUrl(null);
-                    }}
-                    className="text-xs text-rose-400 hover:underline font-bold min-h-[44px]"
-                  >
-                    Change Photo
-                  </button>
-                </div>
-
-                <CropControls
-                  aspectRatio={aspectRatio}
-                  cropBox={cropBox}
-                  onAspectChange={handleAspectChange}
-                  onCropBoxChange={setCropBox}
-                />
-
-                {/* Visual Image Preview Container with Rule-of-Thirds Crop Box */}
-                <div className="relative overflow-hidden rounded-2xl bg-black/60 border border-white/10 p-3 flex items-center justify-center min-h-[300px] select-none">
-                  <div className="relative inline-block overflow-hidden rounded-lg">
-                    <img
-                      ref={imgRef}
-                      src={uploadedFile.previewUrl}
-                      alt="Source Crop"
-                      className="max-h-[440px] w-auto object-contain rounded-lg block"
-                    />
-                    <div
-                      style={{
-                        left: `${cropBox.x}%`,
-                        top: `${cropBox.y}%`,
-                        width: `${cropBox.width}%`,
-                        height: `${cropBox.height}%`
-                      }}
-                      className="absolute border-2 border-indigo-400 bg-indigo-500/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none transition-all"
-                    >
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
-                        <div className="border-r border-b border-white/20" />
-                        <div className="border-r border-b border-white/20" />
-                        <div className="border-b border-white/20" />
-                        <div className="border-r border-b border-white/20" />
-                        <div className="border-r border-b border-white/20" />
-                        <div className="border-b border-white/20" />
-                        <div className="border-r border-b border-white/20" />
-                        <div className="border-r border-b border-white/20" />
-                        <div />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action CTA */}
+        {!uploadedFile ? (
+          <div className="max-w-2xl mx-auto">
+            <DropzoneUpload
+              uploadedFile={uploadedFile}
+              onFileUpload={(f) => {
+                setUploadedFile(f);
+                setCroppedResultUrl(null);
+              }}
+              onClearFile={() => setUploadedFile(null)}
+            />
+          </div>
+        ) : !croppedResultUrl ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-7 fmf-panel p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Image Stage</span>
                 <button
-                  onClick={executeCrop}
-                  disabled={isProcessing}
-                  className="w-full py-4 min-h-[48px] rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl cursor-pointer"
+                  type="button"
+                  onClick={() => setUploadedFile(null)}
+                  className="text-xs text-rose-400 hover:underline font-bold py-1 cursor-pointer"
                 >
-                  {isProcessing ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Cropping Image...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Crop className="w-4 h-4" />
-                      <span>Crop Selected Region</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
+                  Change Image
                 </button>
               </div>
-            )}
+
+              <CropStage
+                imageUrl={uploadedFile.previewUrl}
+                cropBox={cropBox}
+                aspectRatio={aspectRatio}
+                naturalWidth={naturalDim.width}
+                naturalHeight={naturalDim.height}
+                onCropBoxChange={setCropBox}
+                onImageLoaded={handleImageLoaded}
+              />
+            </div>
+
+            <div className="lg:col-span-5">
+              <CropSidebar
+                aspectRatio={aspectRatio}
+                cropBox={cropBox}
+                naturalWidth={naturalDim.width}
+                naturalHeight={naturalDim.height}
+                outputFormat={outputFormat}
+                quality={quality}
+                isProcessing={isProcessing}
+                onAspectChange={handleAspectChange}
+                onCropBoxChange={setCropBox}
+                onOutputFormatChange={setOutputFormat}
+                onQualityChange={setQuality}
+                onCenterCrop={handleCenterCrop}
+                onExecuteCrop={executeCrop}
+              />
+            </div>
           </div>
-
-          {/* Right Column: Download & Output (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <h2 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Cropped Output Result</span>
-            </h2>
-
-            {croppedResultUrl ? (
-              <div className="bg-[#0d121e] border border-emerald-500/30 rounded-3xl p-6 space-y-6 shadow-2xl backdrop-blur-2xl animate-fade-in">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>Cropped Dimensions</span>
-                    <span className="font-mono font-bold text-emerald-400">
-                      {croppedDimensions?.width} × {croppedDimensions?.height} px
-                    </span>
-                  </div>
-                  <div className="p-2 bg-black/40 rounded-2xl border border-white/10 flex items-center justify-center min-h-[220px]">
-                    <img src={croppedResultUrl} alt="Cropped Result" className="max-h-[300px] w-auto object-contain rounded-lg" />
-                  </div>
-                </div>
-
-                <a
-                  href={croppedResultUrl}
-                  download={`cropped-${uploadedFile?.name || 'image.jpg'}`}
-                  className="w-full py-4 min-h-[48px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 transition-all shadow-xl"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>Download Cropped Image</span>
-                </a>
-              </div>
-            ) : (
-              <div className="bg-[#0d121e] border border-white/10 border-dashed rounded-3xl p-10 text-center text-slate-400 space-y-3">
-                <Crop className="w-8 h-8 text-indigo-400 mx-auto" />
-                <h4 className="font-extrabold text-white text-base">No Cropped Image Yet</h4>
-                <p className="text-xs text-slate-400">Upload your photo on the left, adjust aspect ratio or crop box, then click Crop Selected Region.</p>
-              </div>
-            )}
+        ) : (
+          <div className="max-w-2xl mx-auto fmf-panel-elevated p-8 space-y-6 text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Image Cropped Successfully</span>
+            </div>
+            <div className="relative aspect-square max-h-72 mx-auto rounded-2xl bg-black/50 border border-emerald-500/40 flex items-center justify-center p-3">
+              <img src={croppedResultUrl} alt="Cropped Result" className="max-h-full max-w-full object-contain rounded-lg" />
+            </div>
+            <p className="text-xs font-mono text-slate-300">
+              New Dimensions: <strong className="text-emerald-400 font-bold">{resultDim?.width} × {resultDim?.height} px</strong>
+            </p>
+            <div className="space-y-3 pt-2">
+              <a
+                href={croppedResultUrl}
+                download={`cropped-${uploadedFile?.name || 'image.jpg'}`}
+                className="w-full fmf-btn-primary py-4 text-sm font-black flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/30"
+              >
+                <Download className="w-5 h-5" />
+                <span>Download Cropped IMAGE</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setCroppedResultUrl(null)}
+                className="fmf-btn-secondary px-6 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Crop Again / Adjust</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <SeoContentSection
           title="Free Online Visual Image Cropper"
-          description="Crop your images visually directly in your browser. Maintain aspect ratio locks for passport photos, social media stories, or custom application form specs with zero server upload."
+          description="Crop your images visually directly in your browser. Maintain aspect ratio locks for passport photos or custom specs with zero server upload."
           faqs={[
             {
-              question: 'How do I crop an image to 1:1 square for Instagram or profile photo?',
-              answer: 'Select the 1:1 Square aspect ratio preset, adjust crop box bounds, and click Crop Selected Region.'
+              question: 'How do I crop an image visually?',
+              answer: 'Drag the blue crop box directly over your image or resize it using the corner and edge handles. You can also specify exact pixel dimensions in the sidebar.'
+            },
+            {
+              question: 'How do I lock aspect ratios for passport or square photos?',
+              answer: 'Click the 1:1 Square or Passport (3.5:4.5) preset in the sidebar. The crop handles will automatically scale proportionally.'
             }
           ]}
         />

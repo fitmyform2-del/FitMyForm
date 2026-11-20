@@ -18,11 +18,13 @@ import {
   FileCheck,
   GraduationCap,
   FileText,
+  Presentation,
   Image as ImageIcon
 } from 'lucide-react';
 
 export function getToolIcon(iconName: string) {
   switch (iconName) {
+    case 'Presentation': return <Presentation className="w-6 h-6 text-indigo-400" />;
     case 'Minimize2': return <Minimize2 className="w-6 h-6 text-rose-400" />;
     case 'Maximize2': return <Maximize2 className="w-6 h-6 text-blue-400" />;
     case 'Crop': return <Crop className="w-6 h-6 text-amber-400" />;

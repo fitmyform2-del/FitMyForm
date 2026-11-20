@@ -21,8 +21,8 @@ export function HomeToolGrid() {
 
   return (
     <section className="space-y-6 pt-2">
-      {/* Category Pills & Search Bar (iLove Style) */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-2.5 rounded-2xl glass-panel">
+      {/* Category Pills & Search Bar */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-2 rounded-2xl bg-[#111726] border border-white/[0.08]">
         {/* Category Tabs */}
         <div className="flex overflow-x-auto w-full md:w-auto pb-1 md:pb-0 gap-1.5 snap-x no-scrollbar">
           {TOOL_CATEGORIES.map((cat) => (
@@ -31,7 +31,7 @@ export function HomeToolGrid() {
               onClick={() => setSelectedCategory(cat.id)}
               className={`snap-center shrink-0 touch-target px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedCategory === cat.id
-                  ? 'bg-indigo-600 text-white shadow-md'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                   : 'bg-white/[0.04] text-slate-300 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
@@ -48,7 +48,7 @@ export function HomeToolGrid() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tools (ssc, compress, crop...)"
-            className="w-full touch-target pl-9 pr-8 py-2 rounded-xl bg-black/40 border border-white/10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+            className="w-full touch-target pl-9 pr-8 py-2 rounded-xl bg-black/40 border border-white/10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all"
           />
           {searchQuery && (
             <button
@@ -61,15 +61,15 @@ export function HomeToolGrid() {
         </div>
       </div>
 
-      {/* Tools Cards Grid (iLoveIMG Style) */}
+      {/* Tools Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredTools.map((tool) => (
           <Link
             key={tool.id}
             href={tool.route}
-            className="antigravity-card-3d p-5 rounded-2xl flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+            className="fmf-card p-5 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
           >
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
                   {getToolIcon(tool.iconName)}
@@ -82,19 +82,19 @@ export function HomeToolGrid() {
               </div>
 
               <div>
-                <h3 className="font-extrabold text-white text-base group-hover:text-indigo-300 flex items-center gap-1.5 transition-colors">
+                <h3 className="font-black text-white text-base group-hover:text-blue-400 flex items-center gap-1.5 transition-colors">
                   <span>{tool.name}</span>
-                  <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
                 </h3>
-                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed line-clamp-2">
+                <p className="text-xs text-slate-300 mt-1.5 leading-relaxed line-clamp-2">
                   {tool.description}
                 </p>
               </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
-              <span className="text-[11px] font-medium text-slate-500">{tool.shortDescription}</span>
-              <span className="text-indigo-400 font-bold group-hover:underline">Open →</span>
+              <span className="text-[11px] font-medium text-slate-400">{tool.shortDescription}</span>
+              <span className="text-blue-400 font-bold group-hover:underline">Open →</span>
             </div>
           </Link>
         ))}

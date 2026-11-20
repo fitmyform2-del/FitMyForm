@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import HomePage from '../page';
+import CompressPdfPage from '../pdf-tools/compress/page';
 
 export const metadata: Metadata = {
   title: 'Client-Side PDF Compressor & Size Reducer (< 500 KB / < 1 MB) | FitMyForm',
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PdfCompressorPage() {
-  return <HomePage />;
+  return <CompressPdfPage />;
 }

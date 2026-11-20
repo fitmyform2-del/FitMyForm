@@ -53,6 +53,19 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
     ]
   };
 
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': faqs.map((faq) => ({
+      '@type': 'Question',
+      'name': faq.question,
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': faq.answer
+      }
+    }))
+  };
+
   return (
     <section className="mt-16 border-t border-white/10 pt-12 space-y-12 max-w-5xl mx-auto">
       <script
@@ -62,6 +75,10 @@ export const SeoContentSection: React.FC<SeoContentSectionProps> = ({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <div className="space-y-3 text-center sm:text-left">

@@ -5,8 +5,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: []
+      disallow: ['/api/']
     },
-    sitemap: 'https://fitmyform.com/sitemap.xml'
+    sitemap: 'https://fitmyform.com/sitemap.xml',
+    host: 'https://fitmyform.com'
   };
 }

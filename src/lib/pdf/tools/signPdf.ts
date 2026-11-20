@@ -150,7 +150,7 @@ export async function signPdfMultiField(
       color: rgb(0.97, 0.98, 1)
     });
 
-    auditPage.drawText('iLoveSign - Audit Trail & e-Sign Certificate', {
+    auditPage.drawText('FitMyForm - Audit Trail & e-Sign Certificate', {
       x: 50,
       y: height - 80,
       size: 18,
