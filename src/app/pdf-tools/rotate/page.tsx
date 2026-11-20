@@ -24,7 +24,8 @@ export default function RotatePdfPage() {
     if (!file) return;
     setIsProcessing(true);
     try {
-      const blob = await rotatePdf(file, { 0: angle });
+      const blob = await rotatePdf(file, {}, angle);
+      if (resultUrl) URL.revokeObjectURL(resultUrl);
       setResultUrl(URL.createObjectURL(blob));
     } catch (err) {
       console.error('Rotate error:', err);

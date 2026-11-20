@@ -111,19 +111,10 @@ export const PDF_TOOLS: PdfToolMeta[] = [
     category: 'compress-edit'
   },
   {
-    id: 'protect',
-    name: 'Protect PDF',
-    shortDescription: 'Encrypt your PDF files with user and owner passwords.',
-    longDescription: 'Secure confidential PDF documents by setting encryption and password protection to prevent unauthorized opening or editing.',
-    route: '/pdf-tools/protect',
-    iconName: 'Lock',
-    category: 'security-sign'
-  },
-  {
     id: 'unlock',
     name: 'Unlock PDF',
-    shortDescription: 'Remove password protection and security restrictions from your PDF.',
-    longDescription: 'Unlock encrypted PDF files by entering the password to produce a standard, password-free PDF document.',
+    shortDescription: 'Remove password protection from your PDF using the document password.',
+    longDescription: 'Decrypt password-protected PDF files in your browser by entering the password to export a clean, password-free PDF.',
     route: '/pdf-tools/unlock',
     iconName: 'Unlock',
     category: 'security-sign'

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BlurBox } from '@/lib/image/editorTools';
-import { Plus, Trash2, Shield, EyeOff, Sparkles, Sliders } from 'lucide-react';
+import { Plus, Trash2, Shield, EyeOff, Sliders } from 'lucide-react';
 
 interface BlurControlsPanelProps {
   boxes: BlurBox[];

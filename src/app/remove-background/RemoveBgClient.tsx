@@ -21,50 +21,70 @@ export default function RemoveBgClient() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const sourceImgRef = useRef<HTMLImageElement | null>(null);
 
   const handleFileUpload = (file: UploadedFile) => {
     setUploadedFile(file);
     setResultUrl(null);
     setSeedPoint(undefined);
+    const orig = new Image();
+    orig.crossOrigin = 'anonymous';
+    orig.onload = () => {
+      sourceImgRef.current = orig;
+    };
+    orig.src = file.previewUrl;
   };
 
   const processBgRemoval = (overrideColor?: string, overrideSeed?: { x: number; y: number }) => {
     if (!uploadedFile) return;
     setIsProcessing(true);
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
+    const runWithImg = (img: HTMLImageElement) => {
       const activeColor = overrideColor || targetColor;
       const activeSeed = overrideSeed || seedPoint;
       const canvas = removeBackgroundCanvas(img, activeColor, tolerance, replacementColor, mode, activeSeed);
       canvas.toBlob((blob) => {
         if (blob) {
-          if (resultUrl) URL.revokeObjectURL(resultUrl);
-          setResultUrl(URL.createObjectURL(blob));
+          setResultUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return URL.createObjectURL(blob);
+          });
         }
         setIsProcessing(false);
       }, replacementColor === 'transparent' ? 'image/png' : 'image/jpeg', 0.95);
+    };
+
+    if (sourceImgRef.current && sourceImgRef.current.complete) {
+      runWithImg(sourceImgRef.current);
+      return;
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      sourceImgRef.current = img;
+      runWithImg(img);
     };
     img.src = uploadedFile.previewUrl;
   };
 
   const handleEyedropperClick = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!imgRef.current) return;
-    const img = imgRef.current;
-    const rect = img.getBoundingClientRect();
-    const scaleX = img.naturalWidth / img.clientWidth;
-    const scaleY = img.naturalHeight / img.clientHeight;
-    const natX = Math.round((e.clientX - rect.left) * scaleX);
-    const natY = Math.round((e.clientY - rect.top) * scaleY);
+    const displayImg = imgRef.current;
+    const sampleSource = sourceImgRef.current || displayImg;
+    const rect = displayImg.getBoundingClientRect();
+    const scaleX = sampleSource.naturalWidth / rect.width;
+    const scaleY = sampleSource.naturalHeight / rect.height;
+    const natX = Math.max(0, Math.min(sampleSource.naturalWidth - 1, Math.round((e.clientX - rect.left) * scaleX)));
+    const natY = Math.max(0, Math.min(sampleSource.naturalHeight - 1, Math.round((e.clientY - rect.top) * scaleY)));
 
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
     const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(img, natX, natY, 1, 1, 0, 0, 1, 1);
+    ctx.drawImage(sampleSource, natX, natY, 1, 1, 0, 0, 1, 1);
     const p = ctx.getImageData(0, 0, 1, 1).data;
-    const sampledHex = `#${[p[0], p[1], p[2]].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+    const sampledHex = `#${[p[0], p[1], p[2]].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
 
     setTargetColor(sampledHex);
     setSeedPoint({ x: natX, y: natY });
@@ -106,7 +126,7 @@ export default function RemoveBgClient() {
                 </button>
               </div>
 
-              <div className="p-4 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center min-h-[340px] overflow-hidden cursor-crosshair">
+              <div className="p-4 checkerboard-bg rounded-2xl border border-white/10 flex items-center justify-center min-h-[340px] overflow-hidden cursor-crosshair">
                 <img
                   ref={imgRef}
                   src={resultUrl || uploadedFile.previewUrl}

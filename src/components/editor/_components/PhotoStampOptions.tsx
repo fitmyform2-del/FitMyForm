@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Calendar, User, Tag, Sparkles, Check } from 'lucide-react';
+import { Calendar, User, Tag, Check } from 'lucide-react';
 import { PhotoStampConfig } from '@/types/document';
 
 interface PhotoStampOptionsProps {

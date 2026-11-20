@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { UploadedFile, DocumentRequirements } from '@/types/document';
-import { ShieldCheck, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Zap } from 'lucide-react';
 
 interface PreUploadAuditCardProps {
   uploadedFile: UploadedFile;

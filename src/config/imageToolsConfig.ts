@@ -14,6 +14,19 @@ export interface ImageToolConfig {
 
 export const IMAGE_TOOLS: ImageToolConfig[] = [
   {
+    id: 'exam-kit',
+    name: 'All-in-One Exam Kit',
+    route: '/exam-kit',
+    category: 'exam',
+    description: 'Upload Photo, Signature, Left Thumb & Handwritten Declaration together and download one ready-to-upload ZIP.',
+    shortDescription: 'Batch ZIP for 40+ Indian exams',
+    badge: 'New',
+    iconName: 'Layers',
+    seoTitle: 'All-in-One Exam Document Kit (Batch ZIP) | FitMyForm',
+    seoDescription: 'Format Photo, Signature, Thumb Impression, and Declaration together in one ZIP for SSC, UPSC, IBPS, NEET, JEE & RRB.',
+    keywords: ['exam kit zip', 'ibps photo signature declaration', 'neet photo postcard signature', 'batch exam resizer']
+  },
+  {
     id: 'ssc-photo-resizer',
     name: 'SSC Photo Resizer',
     route: '/ssc-photo-resizer',
@@ -94,11 +107,11 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     name: 'Convert to JPG',
     route: '/convert-to-jpg',
     category: 'convert',
-    description: 'Turn PNG, GIF, TIF, PSD, SVG, WEBP, or HEIC images to high-quality JPG format in seconds.',
-    shortDescription: 'Convert PNG, WEBP, HEIC to JPG',
+    description: 'Turn PNG, GIF, SVG, or WEBP images into clean JPG format with white background fill in seconds.',
+    shortDescription: 'Convert PNG, WEBP, SVG to JPG',
     iconName: 'FileImage',
-    seoTitle: 'Convert PNG, WEBP, HEIC to JPG Online Free',
-    seoDescription: 'Convert any image format to high quality JPG instantly.',
+    seoTitle: 'Convert PNG, WEBP, SVG to JPG Online Free',
+    seoDescription: 'Convert PNG, WEBP, GIF, and SVG images to high quality JPG instantly.',
     keywords: ['convert to jpg', 'png to jpg converter']
   },
   {
@@ -106,11 +119,11 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     name: 'Convert from JPG',
     route: '/jpg-to-image',
     category: 'convert',
-    description: 'Turn JPG images into transparent PNG, optimized WEBP, or animated GIF in seconds.',
-    shortDescription: 'Convert JPG to PNG, WEBP, or GIF',
+    description: 'Turn JPG images into lossless PNG or lightweight web-optimized WEBP format in seconds.',
+    shortDescription: 'Convert JPG to PNG or WEBP',
     iconName: 'Repeat',
-    seoTitle: 'Convert JPG to PNG, WEBP & GIF Online Free',
-    seoDescription: 'Convert JPG photos to transparent PNG, WEBP, or animated GIF.',
+    seoTitle: 'Convert JPG to PNG & WEBP Online Free',
+    seoDescription: 'Convert JPG photos to lossless PNG or modern WEBP format.',
     keywords: ['jpg to png converter', 'convert jpg to webp']
   },
   {
@@ -118,12 +131,12 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     name: 'Photo Editor',
     route: '/photo-editor',
     category: 'create',
-    description: 'Spice up pictures with filters, text overlay, crop, brightness, contrast, and stickers.',
-    shortDescription: 'Filters, text overlay, crop & adjust',
+    description: 'Enhance pictures with brightness, contrast, saturation, blur, hue, and instant color presets.',
+    shortDescription: 'Filters, brightness, contrast & presets',
     badge: 'Popular',
     iconName: 'Wand2',
-    seoTitle: 'Free Online Photo Editor - Edit Photos with Filters & Text',
-    seoDescription: 'Edit your photos online for free. Adjust brightness, filters, and text.',
+    seoTitle: 'Free Online Photo Editor - Filters & Color Adjustments',
+    seoDescription: 'Edit your photos online for free with brightness, contrast, saturation, and filter presets.',
     keywords: ['online photo editor free', 'photo filter maker']
   },
   {
@@ -227,6 +240,18 @@ export const IMAGE_TOOLS: ImageToolConfig[] = [
     seoTitle: 'Sign PDF Online Free - Add Signature to PDF Document',
     seoDescription: 'Fill and sign PDF documents online with 100% legal validity.',
     keywords: ['sign pdf online free', 'esign pdf document']
+  },
+  {
+    id: 'html-to-image',
+    name: 'HTML to Image',
+    route: '/html-to-image',
+    category: 'create',
+    description: 'Render styled HTML & CSS snippets directly into crisp PNG graphics in your browser.',
+    shortDescription: 'Render HTML & CSS to PNG',
+    iconName: 'Code',
+    seoTitle: 'HTML to Image Converter Online Free',
+    seoDescription: 'Convert custom HTML and inline CSS markup into downloadable PNG images client-side.',
+    keywords: ['html to image', 'html to png', 'css card renderer']
   },
   {
     id: 'whiteboard',

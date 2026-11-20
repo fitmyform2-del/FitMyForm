@@ -1,4 +1,4 @@
-import { DocumentType, FileFormat, CropMode } from './document';
+import type { DocumentType, FileFormat, CropMode } from './document';
 
 export interface SingleDocSpec {
   title: string;

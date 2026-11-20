@@ -1,17 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { InteractiveCropper } from '@/components/editor/InteractiveCropper';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
+import { PreUploadAuditCard } from '@/components/validation/PreUploadAuditCard';
 import { UploadedFile, DocumentRequirements, ProcessingResult, CropRect } from '@/types/document';
+import { SingleDocSpec } from '@/types/presets';
+import { EXAM_PRESETS } from '@/config/presets';
 import { loadImage, renderToCanvas } from '@/lib/image/resizer';
 import { compressCanvasToTargetSize } from '@/lib/compression/iterativeCompressor';
 import { saveRecentItem } from '@/lib/storage/sessionStore';
-import { Sparkles, CheckCircle2, ShieldCheck, Crop, ArrowLeft } from 'lucide-react';
+import { Sparkles, CheckCircle2, ShieldCheck, Layers, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { LiveResizeStage } from './_components/LiveResizeStage';
 import { ToolSpecsSidebar } from './_components/ToolSpecsSidebar';
 import { ToolResultView } from './_components/ToolResultView';
 
@@ -20,40 +25,114 @@ export interface FocusedToolConfig {
   badge?: string;
   description: string;
   defaultRequirements: DocumentRequirements;
+  /** When true (e.g. Image Compressor), adopt the uploaded image's original width & height to avoid cropping */
+  preserveDimensionsOnUpload?: boolean;
+  /** When true (e.g. Signature Resizer), expand advanced options by default */
+  defaultShowAdvanced?: boolean;
   seoTitle: string;
   seoDescription: string;
   faqs?: { question: string; answer: string }[];
 }
 
-export function FocusedToolPage({ config }: { config: FocusedToolConfig }) {
+function specToRequirements(docSpec: SingleDocSpec, prev: DocumentRequirements): DocumentRequirements {
+  const firstFormat = docSpec.format[0] || 'JPG';
+  const isSig = docSpec.documentType === 'signature';
+  return {
+    ...prev,
+    documentType: docSpec.documentType,
+    width: docSpec.width ?? prev.width,
+    height: docSpec.height ?? prev.height,
+    minWidth: docSpec.minWidth,
+    maxWidth: docSpec.maxWidth,
+    minHeight: docSpec.minHeight,
+    maxHeight: docSpec.maxHeight,
+    format: firstFormat === 'JPEG' ? 'JPG' : firstFormat,
+    minSizeKB: docSpec.minSizeKB,
+    maxSizeKB: docSpec.maxSizeKB,
+    dpi: docSpec.dpi,
+    bgColor: docSpec.bgColor || '#FFFFFF',
+    cropMode: isSig ? 'fit' : docSpec.defaultCropMode || 'fill'
+  };
+}
+
+function FocusedToolInner({ config }: { config: FocusedToolConfig }) {
+  const searchParams = useSearchParams();
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [requirements, setRequirements] = useState<DocumentRequirements>(config.defaultRequirements);
+  const [activePresetInfo, setActivePresetInfo] = useState<{ label: string; notes?: string } | null>(null);
   const [cropRect, setCropRect] = useState<CropRect | undefined>(undefined);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingResult, setProcessingResult] = useState<ProcessingResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleProcess = async () => {
+  const applyPresetSpec = useCallback((docSpec: SingleDocSpec, examName: string) => {
+    setRequirements((prev) => specToRequirements(docSpec, prev));
+    setActivePresetInfo({ label: `${examName} — ${docSpec.title}`, notes: docSpec.notes });
+    setProcessingResult(null);
+    setCropRect(undefined);
+    setErrorMsg(null);
+  }, []);
+
+  // Read ?preset=<examId>&doc=<docKey> from URL when navigated from Presets / Navbar / Exam Showcase
+  useEffect(() => {
+    const presetId = searchParams.get('preset');
+    const docKey = searchParams.get('doc') || 'photo';
+    if (!presetId) return;
+
+    const matchedExam = EXAM_PRESETS.find((e) => e.id === presetId);
+    if (!matchedExam) return;
+
+    const docSpec = matchedExam.documents[docKey] || Object.values(matchedExam.documents).find(Boolean);
+    if (docSpec) {
+      applyPresetSpec(docSpec, matchedExam.name);
+    }
+  }, [searchParams, applyPresetSpec]);
+
+  const handleFileUpload = (file: UploadedFile) => {
+    setUploadedFile(file);
+    setProcessingResult(null);
+    setCropRect(undefined);
+    setErrorMsg(null);
+
+    if (config.preserveDimensionsOnUpload && !activePresetInfo && file.width && file.height) {
+      setRequirements((prev) => ({
+        ...prev,
+        width: file.width,
+        height: file.height,
+        cropMode: 'fit'
+      }));
+    }
+  };
+
+  const handleProcess = async (overrideReqs?: DocumentRequirements) => {
     if (!uploadedFile) return;
+    const effectiveReqs = overrideReqs || requirements;
     setIsProcessing(true);
     setErrorMsg(null);
     try {
       const sourceImg = await loadImage(uploadedFile.previewUrl);
-      const canvas = renderToCanvas(sourceImg, requirements, cropRect);
-      const result = await compressCanvasToTargetSize(canvas, requirements, uploadedFile.name);
+      const canvas = renderToCanvas(sourceImg, effectiveReqs, cropRect);
+      const result = await compressCanvasToTargetSize(canvas, effectiveReqs, uploadedFile.name);
+      if (processingResult?.previewUrl) {
+        URL.revokeObjectURL(processingResult.previewUrl);
+      }
       setProcessingResult(result);
       saveRecentItem({
         fileName: result.fileName,
-        documentType: requirements.documentType,
+        documentType: effectiveReqs.documentType,
         originalSizeKB: uploadedFile.originalSizeKB,
         processedSizeKB: result.fileSizeKB,
         format: result.format,
         dimensions: `${result.width} × ${result.height} px`
       });
-      try {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      } catch {}
+      if (result.isValid) {
+        try {
+          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+        } catch {
+          // ignore
+        }
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error processing document.';
       setErrorMsg(msg);
@@ -64,9 +143,9 @@ export function FocusedToolPage({ config }: { config: FocusedToolConfig }) {
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
-      <Navbar />
+      <Navbar onSelectPresetDoc={applyPresetSpec} />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           {config.badge && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-300 text-xs font-bold uppercase tracking-wider">
@@ -75,75 +154,100 @@ export function FocusedToolPage({ config }: { config: FocusedToolConfig }) {
             </div>
           )}
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            {config.title}
+            {activePresetInfo ? activePresetInfo.label : config.title}
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            {config.description}
+            {activePresetInfo?.notes || config.description}
           </p>
         </div>
+
+        {/* Active Exam Preset Banner */}
+        {activePresetInfo && (
+          <div className="max-w-3xl mx-auto bg-indigo-500/10 border border-indigo-500/30 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <Layers className="w-4 h-4 text-indigo-400 shrink-0" />
+              <div>
+                <span className="font-bold text-white">Active Exam Preset: {activePresetInfo.label}</span>
+                <span className="block sm:inline sm:ml-2 font-mono text-emerald-400">
+                  {requirements.width}×{requirements.height} px • {requirements.minSizeKB}–{requirements.maxSizeKB} KB {requirements.format}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setActivePresetInfo(null);
+                setRequirements(config.defaultRequirements);
+              }}
+              className="text-slate-300 hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer font-semibold"
+            >
+              <X className="w-3.5 h-3.5" /> Reset Preset
+            </button>
+          </div>
+        )}
 
         {!uploadedFile ? (
           <div className="max-w-2xl mx-auto">
             <DropzoneUpload
               uploadedFile={uploadedFile}
-              onFileUpload={(file) => {
-                setUploadedFile(file);
-                setProcessingResult(null);
-                setErrorMsg(null);
-              }}
+              onFileUpload={handleFileUpload}
               onClearFile={() => setUploadedFile(null)}
+              allowPdf={false}
             />
           </div>
         ) : !processingResult ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-6 fmf-panel p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Selected Image</span>
-                <button
-                  onClick={() => setUploadedFile(null)}
-                  className="text-xs text-rose-400 hover:underline font-bold py-1 cursor-pointer"
-                >
-                  Change Photo
-                </button>
-              </div>
+            <div className="lg:col-span-7 space-y-4">
+              <LiveResizeStage
+                uploadedFile={uploadedFile}
+                requirements={requirements}
+                cropRect={cropRect}
+                onRequirementsChange={setRequirements}
+                onCropChange={(rect) => {
+                  setCropRect(rect);
+                  if (!rect && requirements.cropMode === 'manual') {
+                    setRequirements((prev) => ({ ...prev, cropMode: 'fill' }));
+                  }
+                }}
+                onModeSwitchToManual={() => setRequirements((prev) => ({ ...prev, cropMode: 'manual' }))}
+                onOpenFullCropper={() => setIsCropperOpen(true)}
+                onChangePhoto={() => {
+                  setUploadedFile(null);
+                  setCropRect(undefined);
+                  setProcessingResult(null);
+                }}
+              />
 
-              <div className="relative aspect-square max-h-72 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center p-3 overflow-hidden shadow-inner">
-                <img src={uploadedFile.previewUrl} alt="Source" className="max-h-full max-w-full object-contain rounded-lg" />
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-300 font-mono pt-1">
-                <span>Original: <strong className="text-emerald-400">{uploadedFile.originalSizeKB} KB</strong></span>
-                <span>Dimensions: <strong className="text-blue-300">{uploadedFile.width}×{uploadedFile.height} px</strong></span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsCropperOpen(true)}
-                className="w-full py-2.5 rounded-xl fmf-btn-secondary text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Crop className="w-4 h-4 text-blue-400" />
-                <span>Visual Crop & Position ✂️</span>
-              </button>
+              <PreUploadAuditCard uploadedFile={uploadedFile} requirements={requirements} />
             </div>
 
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-5">
               <ToolSpecsSidebar
                 requirements={requirements}
                 isProcessing={isProcessing}
                 errorMsg={errorMsg}
                 sourceAspectRatio={uploadedFile.aspectRatio}
+                originalWidth={uploadedFile.width}
+                originalHeight={uploadedFile.height}
+                defaultLockAspect={Boolean(config.preserveDimensionsOnUpload && !activePresetInfo)}
+                defaultShowAdvanced={Boolean(config.defaultShowAdvanced)}
                 onRequirementsChange={setRequirements}
                 onProcess={handleProcess}
-                onOpenCropper={() => setIsCropperOpen(true)}
               />
             </div>
           </div>
         ) : (
           <ToolResultView
+            uploadedFile={uploadedFile}
+            requirements={requirements}
             processingResult={processingResult}
+            onBackToAdjust={() => setProcessingResult(null)}
+            onOptimizeAgain={() => handleProcess()}
             onReset={() => {
+              if (processingResult.previewUrl) URL.revokeObjectURL(processingResult.previewUrl);
               setUploadedFile(null);
               setProcessingResult(null);
+              setCropRect(undefined);
             }}
           />
         )}
@@ -185,13 +289,22 @@ export function FocusedToolPage({ config }: { config: FocusedToolConfig }) {
           isOpen={isCropperOpen}
           uploadedFile={uploadedFile}
           requirements={requirements}
+          initialCrop={cropRect}
           onClose={() => setIsCropperOpen(false)}
           onApplyCrop={(rect) => {
             setCropRect(rect);
-            setRequirements({ ...requirements, cropMode: 'manual' });
+            setRequirements((prev) => ({ ...prev, cropMode: 'manual' }));
           }}
         />
       )}
     </div>
+  );
+}
+
+export function FocusedToolPage({ config }: { config: FocusedToolConfig }) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0b0f19]" />}>
+      <FocusedToolInner config={config} />
+    </Suspense>
   );
 }

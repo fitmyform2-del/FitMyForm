@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, PenTool, Check, Wand2 } from 'lucide-react';
+import { PenTool, Check } from 'lucide-react';
 import { SignatureFilterConfig } from '@/types/document';
 
 interface SignatureFilterOptionsProps {

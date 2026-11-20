@@ -1,18 +1,60 @@
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import JSZip from 'jszip';
 import { JpgToPdfOptions, AnnotationItem, hexToRgb } from './types';
+import { sanitizeWinAnsi } from '../pdfjsLoader';
+
+/** Convert any browser-readable image file (WEBP, GIF, SVG, BMP, etc.) into JPEG bytes via Canvas */
+async function rasterizeImageFileToJpeg(file: File): Promise<ArrayBuffer> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error(`Unsupported or corrupted image: ${file.name}`));
+      el.src = url;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context unavailable');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Failed to encode image'))), 'image/jpeg', 0.92);
+    });
+    return blob.arrayBuffer();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
 
 /** JPG / IMAGES TO PDF */
 export async function imagesToPdf(files: File[], opts: JpgToPdfOptions): Promise<Blob> {
   const pdfDoc = await PDFDocument.create();
 
   for (const file of files) {
-    const arrayBuffer = await file.arrayBuffer();
     let img;
-    if (file.type.includes('png')) {
-      img = await pdfDoc.embedPng(arrayBuffer);
+    const lowerType = file.type.toLowerCase();
+    const lowerName = file.name.toLowerCase();
+
+    if (lowerType === 'image/png' || lowerName.endsWith('.png')) {
+      try {
+        img = await pdfDoc.embedPng(await file.arrayBuffer());
+      } catch {
+        img = await pdfDoc.embedJpg(await rasterizeImageFileToJpeg(file));
+      }
+    } else if (lowerType === 'image/jpeg' || lowerType === 'image/jpg' || lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) {
+      try {
+        img = await pdfDoc.embedJpg(await file.arrayBuffer());
+      } catch {
+        img = await pdfDoc.embedJpg(await rasterizeImageFileToJpeg(file));
+      }
     } else {
-      img = await pdfDoc.embedJpg(arrayBuffer);
+      // WEBP, GIF, BMP, SVG -> normalize cleanly via canvas
+      img = await pdfDoc.embedJpg(await rasterizeImageFileToJpeg(file));
     }
 
     let pageW = 595.28; // A4 portrait width in points
@@ -54,7 +96,7 @@ export async function imagesToPdf(files: File[], opts: JpgToPdfOptions): Promise
       x,
       y,
       width: drawW,
-      height: drawH,
+      height: drawH
     });
   }
 
@@ -77,14 +119,15 @@ export async function editPdf(file: File, annotations: AnnotationItem[]): Promis
     const color = hexToRgb(ann.color || '#3b82f6');
 
     if (ann.type === 'text' && ann.text) {
+      const size = ann.fontSize || 16;
       const x = ann.xRatio * width;
-      const y = (1 - ann.yRatio) * height;
-      page.drawText(ann.text, {
+      const y = (1 - ann.yRatio) * height - size;
+      page.drawText(sanitizeWinAnsi(ann.text), {
         x,
-        y,
-        size: ann.fontSize || 16,
+        y: Math.max(4, y),
+        size,
         font,
-        color,
+        color
       });
     } else if (ann.type === 'rect' && ann.wRatio && ann.hRatio) {
       const w = ann.wRatio * width;
@@ -97,7 +140,7 @@ export async function editPdf(file: File, annotations: AnnotationItem[]): Promis
         width: w,
         height: h,
         borderColor: color,
-        borderWidth: 2,
+        borderWidth: 2
       });
     }
   });
@@ -111,8 +154,12 @@ export async function zipAndDownloadBlobs(blobs: { blob: Blob; name: string }[],
   const zip = new JSZip();
   blobs.forEach((b) => zip.file(b.name, b.blob));
   const zipContent = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(zipContent);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(zipContent);
+  link.href = url;
   link.download = zipFilename;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

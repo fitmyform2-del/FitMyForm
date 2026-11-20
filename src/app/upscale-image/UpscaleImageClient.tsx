@@ -7,7 +7,7 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { upscaleImageCanvas } from '@/lib/image/editorTools';
-import { Sparkles, Download, RefreshCw, CheckCircle2, ArrowRight, Settings2 } from 'lucide-react';
+import { Sparkles, Download, RefreshCw, ArrowRight, Settings2, RotateCcw } from 'lucide-react';
 
 export default function UpscaleImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -118,7 +118,7 @@ export default function UpscaleImageClient() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setScaleFactor(2)}
+                  onClick={() => { setScaleFactor(2); setUpscaledUrl(null); }}
                   className={`p-4 rounded-2xl border text-center transition-all cursor-pointer ${
                     scaleFactor === 2
                       ? 'bg-blue-600/30 border-blue-400 text-white shadow-lg'
@@ -132,7 +132,7 @@ export default function UpscaleImageClient() {
 
                 <button
                   type="button"
-                  onClick={() => setScaleFactor(4)}
+                  onClick={() => { setScaleFactor(4); setUpscaledUrl(null); }}
                   className={`p-4 rounded-2xl border text-center transition-all cursor-pointer ${
                     scaleFactor === 4
                       ? 'bg-blue-600/30 border-blue-400 text-white shadow-lg'
@@ -150,7 +150,7 @@ export default function UpscaleImageClient() {
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="w-full flex items-center justify-between text-xs font-bold text-blue-400 hover:text-blue-300 py-1"
+                  className="w-full flex items-center justify-between text-xs font-bold text-blue-400 hover:text-blue-300 py-1 cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
                     <Settings2 className="w-3.5 h-3.5" />
@@ -171,7 +171,7 @@ export default function UpscaleImageClient() {
                       max="1"
                       step="0.05"
                       value={sharpen}
-                      onChange={(e) => setSharpen(Number(e.target.value))}
+                      onChange={(e) => { setSharpen(Number(e.target.value)); setUpscaledUrl(null); }}
                       className="w-full accent-blue-500"
                     />
                   </div>
@@ -194,20 +194,30 @@ export default function UpscaleImageClient() {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-amber-300" />
-                      <span>Upscale IMAGE</span>
+                      <span>Upscale IMAGE ({scaleFactor}×)</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
               ) : (
-                <a
-                  href={upscaledUrl}
-                  download={`upscaled-${scaleFactor}x-${uploadedFile.name}`}
-                  className="w-full fmf-btn-primary py-4 text-sm font-black flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>Download Upscaled ({upscaledDimensions?.w}×{upscaledDimensions?.h} px)</span>
-                </a>
+                <div className="space-y-2.5">
+                  <a
+                    href={upscaledUrl}
+                    download={`upscaled-${scaleFactor}x-${uploadedFile.name.replace(/\.[^/.]+$/, '')}.jpg`}
+                    className="w-full fmf-btn-primary py-4 text-sm font-black flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>Download Upscaled ({upscaledDimensions?.w}×{upscaledDimensions?.h} px)</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setUpscaledUrl(null)}
+                    className="w-full fmf-btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Adjust Settings & Re-Upscale</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

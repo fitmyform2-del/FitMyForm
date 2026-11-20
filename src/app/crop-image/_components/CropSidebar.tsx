@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Crop, RefreshCw, ArrowRight, Settings2, Crosshair } from 'lucide-react';
+import { Crop, RefreshCw, ArrowRight, Sliders } from 'lucide-react';
 import { CropBox } from './cropMath';
 
 interface CropSidebarProps {
@@ -11,22 +11,26 @@ interface CropSidebarProps {
   naturalHeight: number;
   outputFormat: 'image/jpeg' | 'image/png' | 'image/webp';
   quality: number;
+  exportWidth: number | null;
+  exportHeight: number | null;
   isProcessing: boolean;
   onAspectChange: (ratio: number | null) => void;
   onCropBoxChange: (box: CropBox) => void;
   onOutputFormatChange: (fmt: 'image/jpeg' | 'image/png' | 'image/webp') => void;
   onQualityChange: (q: number) => void;
-  onCenterCrop: () => void;
+  onExportDimChange: (w: number | null, h: number | null) => void;
   onExecuteCrop: () => void;
 }
 
-const PRESETS = [
-  { label: 'Freeform', ratio: null },
-  { label: '1:1 Square', ratio: 1 },
-  { label: '16:9 Wide', ratio: 16 / 9 },
-  { label: '4:3 Standard', ratio: 4 / 3 },
-  { label: '3:4 Portrait', ratio: 3 / 4 },
-  { label: 'Passport (3.5:4.5)', ratio: 3.5 / 4.5 },
+const PRESETS: { label: string; sub: string; ratio: number | null; boxClass: string }[] = [
+  { label: 'Freeform', sub: 'Any ratio', ratio: null, boxClass: 'w-4 h-3 border-dashed' },
+  { label: '1:1', sub: 'Square', ratio: 1, boxClass: 'w-3.5 h-3.5' },
+  { label: 'Passport', sub: '3.5 : 4.5', ratio: 3.5 / 4.5, boxClass: 'w-3 h-4' },
+  { label: 'Signature', sub: '140 : 60', ratio: 140 / 60, boxClass: 'w-5 h-2.5' },
+  { label: '4:3', sub: 'Photo', ratio: 4 / 3, boxClass: 'w-4 h-3' },
+  { label: '16:9', sub: 'Widescreen', ratio: 16 / 9, boxClass: 'w-5 h-2.5' },
+  { label: '4:5', sub: 'Portrait', ratio: 4 / 5, boxClass: 'w-3 h-3.5' },
+  { label: '9:16', sub: 'Story', ratio: 9 / 16, boxClass: 'w-2.5 h-4' }
 ];
 
 export function CropSidebar({
@@ -36,19 +40,23 @@ export function CropSidebar({
   naturalHeight,
   outputFormat,
   quality,
+  exportWidth,
+  exportHeight,
   isProcessing,
   onAspectChange,
   onCropBoxChange,
   onOutputFormatChange,
   onQualityChange,
-  onCenterCrop,
-  onExecuteCrop,
+  onExportDimChange,
+  onExecuteCrop
 }: CropSidebarProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [localW, setLocalW] = useState(String(cropBox.width));
   const [localH, setLocalH] = useState(String(cropBox.height));
   const [localX, setLocalX] = useState(String(cropBox.x));
   const [localY, setLocalY] = useState(String(cropBox.y));
+  const [resizeOutput, setResizeOutput] = useState(Boolean(exportWidth && exportHeight));
+  const [outWStr, setOutWStr] = useState(String(exportWidth || 200));
+  const [outHStr, setOutHStr] = useState(String(exportHeight || 230));
 
   useEffect(() => {
     setLocalW(String(cropBox.width));
@@ -97,57 +105,71 @@ export function CropSidebar({
     onCropBoxChange({ ...cropBox, y });
   };
 
+  const toggleResizeOutput = (enabled: boolean) => {
+    setResizeOutput(enabled);
+    if (!enabled) {
+      onExportDimChange(null, null);
+    } else {
+      const w = parseInt(outWStr, 10) || cropBox.width;
+      const h = parseInt(outHStr, 10) || cropBox.height;
+      onExportDimChange(w, h);
+    }
+  };
+
   return (
-    <div className="fmf-panel p-6 space-y-5">
-      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-        <h3 className="font-extrabold text-white text-sm">Crop Options</h3>
-        <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">Smart Crop</span>
+    <div className="fmf-panel p-5 sm:p-6 space-y-5">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <Sliders className="w-3.5 h-3.5" />
+          </div>
+          <h3 className="font-extrabold text-white text-sm">Crop & Export Inspector</h3>
+        </div>
+        <span className="text-[11px] font-mono text-emerald-400 font-bold">
+          {resizeOutput && exportWidth && exportHeight
+            ? `${exportWidth}×${exportHeight}`
+            : `${cropBox.width}×${cropBox.height}`} px
+        </span>
       </div>
 
-      {/* Aspect Ratio Presets */}
+      {/* Visual Aspect Ratio Grid */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-slate-300">Aspect Ratio</label>
-        <div className="grid grid-cols-3 gap-2">
-          {PRESETS.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => onAspectChange(item.ratio)}
-              className={`py-2 px-1 text-xs font-bold rounded-xl border transition-all ${
-                aspectRatio === item.ratio
-                  ? 'bg-blue-600 border-blue-400 text-white shadow-md'
-                  : 'bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/[0.08]'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        <label className="text-xs font-bold text-slate-200">Aspect Ratio</label>
+        <div className="grid grid-cols-4 gap-1.5">
+          {PRESETS.map((item) => {
+            const active = aspectRatio === item.ratio;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => onAspectChange(item.ratio)}
+                className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                  active
+                    ? 'bg-blue-600/25 border-blue-400 text-white shadow-sm'
+                    : 'bg-white/[0.03] border-white/10 text-slate-300 hover:bg-white/[0.08]'
+                }`}
+              >
+                <span className={`border rounded-[2px] ${item.boxClass} ${active ? 'border-blue-300' : 'border-slate-500'}`} />
+                <span className="text-[11px] font-bold leading-none mt-0.5">{item.label}</span>
+                <span className="text-[9px] text-slate-400 leading-none">{item.sub}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Dimensions & Position */}
-      <div className="space-y-3 bg-white/[0.03] p-4 rounded-xl border border-white/10">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-300">Exact Dimensions (Pixels)</span>
-          <button
-            type="button"
-            onClick={onCenterCrop}
-            className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-          >
-            <Crosshair className="w-3 h-3" />
-            <span>Center Box</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
+      {/* Exact Crop Coordinates */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-slate-200">Crop Area (Pixels)</label>
+        <div className="grid grid-cols-2 gap-2.5">
           {[
-            { label: 'Width px', val: localW, set: setLocalW, commit: commitWidth },
-            { label: 'Height px', val: localH, set: setLocalH, commit: commitHeight },
-            { label: 'Position X px', val: localX, set: setLocalX, commit: commitX },
-            { label: 'Position Y px', val: localY, set: setLocalY, commit: commitY },
+            { label: 'Width', val: localW, set: setLocalW, commit: commitWidth },
+            { label: 'Height', val: localH, set: setLocalH, commit: commitHeight },
+            { label: 'Offset X', val: localX, set: setLocalX, commit: commitX },
+            { label: 'Offset Y', val: localY, set: setLocalY, commit: commitY }
           ].map((field) => (
-            <div key={field.label} className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase">{field.label}</label>
+            <div key={field.label} className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 focus-within:border-blue-500">
+              <label className="text-[10px] font-bold text-slate-400 uppercase block">{field.label}</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -156,70 +178,105 @@ export function CropSidebar({
                 onChange={(e) => field.set(e.target.value.replace(/\D/g, ''))}
                 onBlur={field.commit}
                 onKeyDown={(e) => e.key === 'Enter' && field.commit()}
-                className="w-full bg-black/40 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:border-blue-500 focus:outline-none"
+                className="w-full bg-transparent text-sm text-white font-mono font-bold focus:outline-none"
               />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Advanced Options Accordion */}
-      <div className="border-t border-white/[0.08] pt-3">
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full flex items-center justify-between text-xs font-bold text-blue-400 hover:text-blue-300 py-1 cursor-pointer"
-        >
-          <span className="flex items-center gap-1.5">
-            <Settings2 className="w-3.5 h-3.5" />
-            <span>Advanced options</span>
-          </span>
-          <span>{showAdvanced ? '▲' : '▼'}</span>
-        </button>
-        {showAdvanced && (
-          <div className="space-y-3 pt-3 text-xs animate-fade-in">
+      {/* Optional Export Resize */}
+      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3.5 space-y-3">
+        <label className="flex items-center justify-between cursor-pointer text-xs">
+          <span className="font-bold text-slate-200">Resize output to exact pixels</span>
+          <input
+            type="checkbox"
+            checked={resizeOutput}
+            onChange={(e) => toggleResizeOutput(e.target.checked)}
+            className="w-4 h-4 accent-blue-600 cursor-pointer"
+          />
+        </label>
+        {resizeOutput && (
+          <div className="grid grid-cols-2 gap-2.5 pt-1">
             <div>
-              <label className="text-slate-400 font-bold uppercase text-[10px] block mb-1.5">Output Format</label>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'JPG', val: 'image/jpeg' },
-                  { label: 'PNG', val: 'image/png' },
-                  { label: 'WEBP', val: 'image/webp' },
-                ].map((fmt) => (
-                  <button
-                    key={fmt.label}
-                    type="button"
-                    onClick={() => onOutputFormatChange(fmt.val as any)}
-                    className={`py-1.5 rounded-lg border text-xs font-bold ${
-                      outputFormat === fmt.val ? 'bg-blue-600 border-blue-400 text-white' : 'border-white/10 text-slate-400'
-                    }`}
-                  >
-                    {fmt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-slate-400 text-[10px] font-bold uppercase mb-1">
-                <span>Quality</span>
-                <span>{Math.round(quality * 100)}%</span>
-              </div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Export W (px)</span>
               <input
-                type="range"
-                min="0.6"
-                max="1.0"
-                step="0.05"
-                value={quality}
-                onChange={(e) => onQualityChange(Number(e.target.value))}
-                className="w-full accent-blue-500"
+                type="text"
+                inputMode="numeric"
+                value={outWStr}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '');
+                  setOutWStr(v);
+                  const n = parseInt(v, 10);
+                  if (n >= 10) onExportDimChange(n, parseInt(outHStr, 10) || cropBox.height);
+                }}
+                className="w-full mt-1 bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
+              />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Export H (px)</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={outHStr}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, '');
+                  setOutHStr(v);
+                  const n = parseInt(v, 10);
+                  if (n >= 10) onExportDimChange(parseInt(outWStr, 10) || cropBox.width, n);
+                }}
+                className="w-full mt-1 bg-black/50 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono"
               />
             </div>
           </div>
         )}
       </div>
 
-      {/* Action Button */}
+      {/* Output Format & Quality */}
+      <div className="space-y-3 pt-1">
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { label: 'JPG', val: 'image/jpeg' },
+              { label: 'PNG', val: 'image/png' },
+              { label: 'WEBP', val: 'image/webp' }
+            ] as const
+          ).map((fmt) => (
+            <button
+              key={fmt.label}
+              type="button"
+              onClick={() => onOutputFormatChange(fmt.val)}
+              className={`py-2 rounded-xl border text-xs font-bold font-mono cursor-pointer transition-all ${
+                outputFormat === fmt.val
+                  ? 'bg-blue-600 border-blue-400 text-white shadow-md'
+                  : 'bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/[0.08]'
+              }`}
+            >
+              {fmt.label}
+            </button>
+          ))}
+        </div>
+
+        {outputFormat !== 'image/png' && (
+          <div>
+            <div className="flex justify-between text-slate-300 text-[11px] font-bold mb-1">
+              <span>Export Quality</span>
+              <span className="font-mono text-blue-300">{Math.round(quality * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="1.0"
+              step="0.05"
+              value={quality}
+              onChange={(e) => onQualityChange(Number(e.target.value))}
+              className="w-full accent-blue-500 cursor-pointer"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Primary Action */}
       <button
         type="button"
         onClick={onExecuteCrop}
@@ -234,7 +291,7 @@ export function CropSidebar({
         ) : (
           <>
             <Crop className="w-4 h-4" />
-            <span>Crop IMAGE</span>
+            <span>Crop & Export Image</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}

@@ -24,6 +24,21 @@ export function rotateAndFlipCanvas(
   return canvas;
 }
 
+function parseHexRgb(hexInput: string, fallback: [number, number, number] = [255, 255, 255]): [number, number, number] {
+  const clean = hexInput.replace('#', '').trim();
+  const full = clean.length === 3
+    ? clean.split('').map((c) => c + c).join('')
+    : clean.padEnd(6, '0');
+  const r = parseInt(full.substring(0, 2), 16);
+  const g = parseInt(full.substring(2, 4), 16);
+  const b = parseInt(full.substring(4, 6), 16);
+  return [
+    Number.isNaN(r) ? fallback[0] : r,
+    Number.isNaN(g) ? fallback[1] : g,
+    Number.isNaN(b) ? fallback[2] : b
+  ];
+}
+
 /**
  * Remove Background based on color tolerance & contiguous edge flood fill
  */
@@ -46,18 +61,11 @@ export function removeBackgroundCanvas(
   const imgData = ctx.getImageData(0, 0, w, h);
   const data = imgData.data;
 
-  // Convert Hex target color to RGB
-  const hex = targetColorHex.replace('#', '');
-  const targetR = parseInt(hex.substring(0, 2), 16) || 255;
-  const targetG = parseInt(hex.substring(2, 4), 16) || 255;
-  const targetB = parseInt(hex.substring(4, 6), 16) || 255;
+  const [targetR, targetG, targetB] = parseHexRgb(targetColorHex, [255, 255, 255]);
 
   let repR = 0, repG = 0, repB = 0, repA = 0;
   if (replacementColorHex !== 'transparent') {
-    const rHex = replacementColorHex.replace('#', '');
-    repR = parseInt(rHex.substring(0, 2), 16) || 255;
-    repG = parseInt(rHex.substring(2, 4), 16) || 255;
-    repB = parseInt(rHex.substring(4, 6), 16) || 255;
+    [repR, repG, repB] = parseHexRgb(replacementColorHex, [255, 255, 255]);
     repA = 255;
   }
 

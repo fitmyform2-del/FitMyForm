@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { BlurBox } from '@/lib/image/editorTools';
-import { X, Move, Sparkles } from 'lucide-react';
+import { X, Move } from 'lucide-react';
 
 interface BlurCanvasEditorProps {
   imageSrc: string;

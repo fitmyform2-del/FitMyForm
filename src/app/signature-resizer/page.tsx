@@ -14,7 +14,8 @@ export default function SignatureResizerPage() {
       config={{
         title: 'Online Signature Resizer (140×60 px, 10–20 KB)',
         badge: 'SSC / IBPS / RRB Standards',
-        description: 'Resize signature scans or photos to exact official dimensions (140 × 60 px) and file size (10–20 KB JPG) with clean background padding.',
+        description: 'Resize signature scans or photos to exact official dimensions (140 × 60 px) and file size (10–20 KB JPG) with clean white background padding.',
+        defaultShowAdvanced: true,
         defaultRequirements: {
           documentType: 'signature',
           width: 140,
@@ -23,7 +24,7 @@ export default function SignatureResizerPage() {
           minSizeKB: 10,
           maxSizeKB: 20,
           bgColor: '#FFFFFF',
-          cropMode: 'fill'
+          cropMode: 'fit'
         },
         seoTitle: 'How to Resize Signature for Online Applications',
         seoDescription: 'Accurately crop, resize, and compress signature images to 140x60 pixels and 10 to 20 KB for online examination applications.',

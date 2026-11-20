@@ -10,7 +10,7 @@ import { Repeat, Download, RefreshCw, CheckCircle2, ArrowRight, Settings2, Rotat
 
 export default function JpgToImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-  const [targetFormat, setTargetFormat] = useState<'png' | 'webp' | 'gif'>('png');
+  const [targetFormat, setTargetFormat] = useState<'png' | 'webp'>('png');
   const [quality, setQuality] = useState(0.92);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [convertedUrl, setConvertedUrl] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export default function JpgToImageClient() {
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(img, 0, 0);
 
-      const mimeType = targetFormat === 'png' ? 'image/png' : targetFormat === 'webp' ? 'image/webp' : 'image/gif';
+      const mimeType = targetFormat === 'png' ? 'image/png' : 'image/webp';
 
       canvas.toBlob((blob) => {
         if (blob) {
@@ -105,16 +105,17 @@ export default function JpgToImageClient() {
               </div>
 
               {/* Simple Format Choices */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { format: 'png', label: 'PNG', desc: 'Lossless' },
-                  { format: 'webp', label: 'WEBP', desc: 'Modern' },
-                  { format: 'gif', label: 'GIF', desc: 'Graphic' }
-                ].map((item) => (
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    { format: 'png', label: 'PNG', desc: 'Lossless crisp quality' },
+                    { format: 'webp', label: 'WEBP', desc: 'Modern small web format' }
+                  ] as const
+                ).map((item) => (
                   <button
                     key={item.format}
                     type="button"
-                    onClick={() => setTargetFormat(item.format as any)}
+                    onClick={() => setTargetFormat(item.format)}
                     className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                       targetFormat === item.format
                         ? 'bg-blue-600 border-blue-400 text-white shadow-md'
@@ -122,7 +123,7 @@ export default function JpgToImageClient() {
                     }`}
                   >
                     <div className="font-black text-sm uppercase">{item.label}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{item.desc}</div>
+                    <div className="text-[10px] text-slate-300/80 mt-0.5">{item.desc}</div>
                   </button>
                 ))}
               </div>
@@ -212,14 +213,26 @@ export default function JpgToImageClient() {
                 <span>Download {targetFormat.toUpperCase()} Image</span>
               </a>
 
-              <button
-                type="button"
-                onClick={() => setConvertedUrl(null)}
-                className="fmf-btn-secondary px-6 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Convert Another Image</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setConvertedUrl(null)}
+                  className="fmf-btn-secondary px-5 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Change Format</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConvertedUrl(null);
+                    setUploadedFile(null);
+                  }}
+                  className="fmf-btn-secondary px-5 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Upload Another Image</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

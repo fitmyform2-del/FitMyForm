@@ -1,6 +1,7 @@
 import { DocumentRequirements, CropRect } from '@/types/document';
 import { applyPhotoStamp } from './tools/stampTools';
 import { applySignatureFilter } from './tools/signatureTools';
+import { applyWhiteBackground } from './tools/whiteBgTools';
 
 export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -41,23 +42,22 @@ export function renderToCanvas(
   const mode = reqs.cropMode || 'fill';
 
   if (mode === 'manual' && cropRect) {
-    // Manual interactive crop mode
-    const { x, y, width: cw, height: ch, zoom, rotation } = cropRect;
+    // Manual interactive crop mode: normalized center offsets (x, y) + zoom + rotation
+    // Matches InteractiveCropper WYSIWYG preview pixel-for-pixel
+    const { x, y, zoom, rotation } = cropRect;
+    const baseScale = Math.max(targetW / img.width, targetH / img.height);
+    const totalScale = baseScale * (zoom || 1);
+
     ctx.save();
-    ctx.translate(targetW / 2, targetH / 2);
+    ctx.translate(targetW / 2 + x * targetW, targetH / 2 + y * targetH);
     if (rotation) {
       ctx.rotate((rotation * Math.PI) / 180);
     }
-
-    const scale = zoom || 1;
-    // Draw cropped region of image onto full target canvas
-    ctx.drawImage(
-      img,
-      x, y, cw, ch,
-      -targetW / 2 * scale, -targetH / 2 * scale, targetW * scale, targetH * scale
-    );
+    ctx.scale(totalScale, totalScale);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
     ctx.restore();
 
+    if (reqs.whiteBg?.enabled) applyWhiteBackground(canvas, reqs.whiteBg);
     if (reqs.signatureFilter?.enabled) applySignatureFilter(canvas, reqs.signatureFilter);
     if (reqs.photoStamp?.enabled) applyPhotoStamp(canvas, reqs.photoStamp);
     return canvas;
@@ -112,6 +112,10 @@ export function renderToCanvas(
     }
 
     ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+  }
+
+  if (reqs.whiteBg?.enabled) {
+    applyWhiteBackground(canvas, reqs.whiteBg);
   }
 
   if (reqs.signatureFilter?.enabled) {

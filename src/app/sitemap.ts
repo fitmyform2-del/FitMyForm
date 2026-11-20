@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { EXAM_PRESETS } from '@/config/presets';
 
 interface RouteConfig {
   path: string;
@@ -14,7 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // 1. Homepage
     { path: '', priority: 1.0, changeFrequency: 'daily' },
 
-    // 2. Core Exam Document Resizers
+    // 2. Core Exam Document Resizers & Batch Kit
+    { path: '/exam-kit', priority: 0.98, changeFrequency: 'daily' },
     { path: '/photo-resizer', priority: 0.95, changeFrequency: 'daily' },
     { path: '/signature-resizer', priority: 0.95, changeFrequency: 'daily' },
     { path: '/ssc-photo-resizer', priority: 0.95, changeFrequency: 'daily' },
@@ -52,7 +54,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/pdf-tools/jpg-to-pdf', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/pdf-tools/pdf-to-jpg', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/pdf-tools/edit', priority: 0.85, changeFrequency: 'weekly' },
-    { path: '/pdf-tools/protect', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/pdf-tools/unlock', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/pdf-tools/organize', priority: 0.85, changeFrequency: 'weekly' },
     { path: '/pdf-tools/rotate', priority: 0.85, changeFrequency: 'weekly' },
@@ -74,7 +75,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/esignatures-for-insurance', priority: 0.75, changeFrequency: 'monthly' },
     { path: '/esignatures-for-legal-services', priority: 0.75, changeFrequency: 'monthly' },
     { path: '/esignatures-for-real-estate', priority: 0.75, changeFrequency: 'monthly' },
-    { path: '/esignatures-for-sales', priority: 0.75, changeFrequency: 'monthly' }
+    { path: '/esignatures-for-sales', priority: 0.75, changeFrequency: 'monthly' },
+
+    // 7. Dedicated SEO Pages for All 40 Verified Exam Presets
+    ...EXAM_PRESETS.map((exam): RouteConfig => ({
+      path: `/exam/${exam.id}`,
+      priority: 0.88,
+      changeFrequency: 'weekly'
+    }))
   ];
 
   return routes.map((r) => ({

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { ShieldCheck, Lock, Key, FileCheck, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Lock, Key, FileCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignature Security & Data Protection Architecture',

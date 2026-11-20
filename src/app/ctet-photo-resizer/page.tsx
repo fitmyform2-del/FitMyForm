@@ -17,8 +17,8 @@ export default function CtetPhotoResizerPage() {
         description: 'Format passport photograph (10–100 KB JPG) and signature (3–30 KB JPG) according to official CBSE CTET guidelines.',
         defaultRequirements: {
           documentType: 'photo',
-          width: 240,
-          height: 320,
+          width: 350,
+          height: 450,
           format: 'JPG',
           minSizeKB: 10,
           maxSizeKB: 100,

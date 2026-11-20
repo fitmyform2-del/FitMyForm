@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { PenTool, ShieldCheck, Zap, Layers, ArrowRight, CheckCircle2, FileText, Lock, Globe } from 'lucide-react';
+import { PenTool, ShieldCheck, Zap, ArrowRight, FileText, Globe } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignature Features - Fast, Secure & Free PDF Signing Platform',

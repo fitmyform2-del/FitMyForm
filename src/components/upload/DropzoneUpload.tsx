@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { UploadCloud, File, Image as ImageIcon, Camera, RefreshCw, AlertCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { UploadCloud, File, Image as ImageIcon, Camera, RefreshCw, AlertCircle, ShieldCheck } from 'lucide-react';
 import { UploadedFile } from '@/types/document';
 import { CameraCaptureModal } from '../camera/CameraCaptureModal';
 
@@ -10,14 +10,17 @@ interface DropzoneUploadProps {
   onFileUpload: (uploaded: UploadedFile) => void;
   onClearFile: () => void;
   acceptLabel?: string;
+  allowPdf?: boolean;
 }
 
 export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
   uploadedFile,
   onFileUpload,
   onClearFile,
-  acceptLabel = 'JPG, PNG, WEBP, or PDF'
+  acceptLabel,
+  allowPdf = false
 }) => {
+  const resolvedAcceptLabel = acceptLabel || (allowPdf ? 'JPG, PNG, WEBP, or PDF' : 'JPG, PNG, or WEBP');
   const [isDragging, setIsDragging] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -34,13 +37,17 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
     const originalSizeKB = Number((file.size / 1024).toFixed(2));
 
     if (isPdf) {
+      if (!allowPdf) {
+        setErrorMsg('This tool works with images (JPG, PNG, WEBP). To edit or compress PDFs, open the PDF Tools menu.');
+        return;
+      }
       onFileUpload({
         id: `pdf-${Date.now()}`,
         file,
         name: file.name,
         originalSizeKB,
         type: 'application/pdf',
-        previewUrl: '/pdf-icon.png',
+        previewUrl: '',
         isPdf: true
       });
       return;
@@ -58,28 +65,30 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
         type: file.type || 'image/jpeg',
         width: img.width,
         height: img.height,
-        aspectRatio: Number((img.width / img.height).toFixed(2)),
+        aspectRatio: Number((img.width / img.height).toFixed(4)),
         previewUrl: objectUrl,
         isPdf: false
       });
     };
 
     img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
       setErrorMsg('Could not load this image file. Please ensure it is a valid JPG, PNG, or WEBP image.');
     };
 
     img.src = objectUrl;
-  }, [onFileUpload]);
+  }, [onFileUpload, allowPdf]);
 
   return (
     <div className="w-full space-y-4">
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+        accept={allowPdf ? 'image/jpeg,image/jpg,image/png,image/webp,application/pdf' : 'image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml'}
         className="hidden"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) processSelectedFile(e.target.files[0]);
+          e.target.value = '';
         }}
       />
 
@@ -105,7 +114,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
             Drop your image here
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mb-6 max-w-sm mx-auto">
-            {acceptLabel} (Max 25 MB)
+            {resolvedAcceptLabel} (Max 25 MB)
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3" onClick={(e) => e.stopPropagation()}>

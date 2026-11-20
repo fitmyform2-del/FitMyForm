@@ -28,6 +28,12 @@ export interface SignatureFilterConfig {
   threshold?: number;
 }
 
+export interface WhiteBgConfig {
+  enabled: boolean;
+  tolerance?: number;
+  fillColor?: string;
+}
+
 export interface DocumentRequirements {
   documentType: DocumentType;
   width?: number; // target width in px
@@ -45,6 +51,7 @@ export interface DocumentRequirements {
   cropMode: CropMode;
   photoStamp?: PhotoStampConfig;
   signatureFilter?: SignatureFilterConfig;
+  whiteBg?: WhiteBgConfig;
 }
 
 export interface UploadedFile {

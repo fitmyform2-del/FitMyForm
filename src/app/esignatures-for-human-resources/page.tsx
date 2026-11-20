@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { Users, ArrowRight, CheckCircle2, FileText, Award } from 'lucide-react';
+import { Users, ArrowRight, FileText, Award } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignatures for Human Resources - Offer Letters & Employee Onboarding',

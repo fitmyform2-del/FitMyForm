@@ -11,7 +11,7 @@ export default function PageNumbersPdfPage() {
   const [file, setFile] = useState<File | null>(null);
   const [position, setPosition] = useState<PageNumberOptions['position']>('bottom-center');
   const [format, setFormat] = useState<PageNumberOptions['format']>('Page {n} of {m}');
-  const [fontSize, setFontSize] = useState<number>(10);
+  const [fontSize] = useState<number>(10);
   const [skipFirstPage, setSkipFirstPage] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [numberedUrl, setNumberedUrl] = useState<string | null>(null);
@@ -96,7 +96,7 @@ export default function PageNumbersPdfPage() {
                   <label className="block text-xs font-bold text-gray-400 mb-1">Position</label>
                   <select
                     value={position}
-                    onChange={(e) => setPosition(e.target.value as any)}
+                    onChange={(e) => setPosition(e.target.value as PageNumberOptions['position'])}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                   >
                     <option value="bottom-center">Bottom Center (Footer)</option>
@@ -112,7 +112,7 @@ export default function PageNumbersPdfPage() {
                   <label className="block text-xs font-bold text-gray-400 mb-1">Format</label>
                   <select
                     value={format}
-                    onChange={(e) => setFormat(e.target.value as any)}
+                    onChange={(e) => setFormat(e.target.value as PageNumberOptions['format'])}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                   >
                     <option value="Page {n} of {m}">Page 1 of N</option>

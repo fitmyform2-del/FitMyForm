@@ -111,7 +111,7 @@ export const SignaturePadModal: React.FC<SignaturePadModalProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id as any)}
+                onClick={() => setTab(item.id as 'draw' | 'type' | 'upload')}
                 className={`flex-1 py-2.5 min-h-[44px] rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                   tab === item.id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                 }`}

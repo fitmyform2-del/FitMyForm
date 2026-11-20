@@ -1,153 +1,55 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
-import { protectPdf } from '@/lib/pdf/pdfTools';
-import { Lock, Upload, Download, RefreshCw, ArrowLeft, CheckCircle2, FileText, KeyRound } from 'lucide-react';
+import { Lock, ArrowLeft, ShieldAlert, EyeOff, Stamp } from 'lucide-react';
 
 export default function ProtectPdfPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [protectedUrl, setProtectedUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setFile(e.target.files[0]);
-      setProtectedUrl(null);
-      setError(null);
-    }
-  };
-
-  const handleProtect = async () => {
-    if (!file) return;
-    if (!password) {
-      setError('Please enter a password.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-    try {
-      const blob = await protectPdf(file, password);
-      setProtectedUrl(URL.createObjectURL(blob));
-    } catch (err: any) {
-      console.error('Protect error:', err);
-      setError(err.message || 'Failed to encrypt PDF.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col">
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-8">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-12 space-y-8">
         <Link href="/pdf-tools" className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 font-bold">
           <ArrowLeft className="w-4 h-4" /> Back to All PDF Tools
         </Link>
 
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400 mx-auto">
-            <Lock className="w-6 h-6" />
+        <div className="fmf-panel p-8 text-center space-y-5">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto">
+            <ShieldAlert className="w-7 h-7" />
           </div>
-          <h1 className="text-3xl font-black text-white">Protect PDF Document</h1>
-          <p className="text-xs text-gray-400">Encrypt confidential PDF files with a secure password.</p>
-        </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl p-6 space-y-6">
-          {!file ? (
-            <div className="border-2 border-dashed border-gray-800 hover:border-blue-500/60 rounded-2xl p-8 text-center space-y-3 bg-gray-950/50">
-              <Upload className="w-8 h-8 text-blue-400 mx-auto" />
-              <p className="text-sm font-bold text-gray-300">Upload PDF to Protect</p>
-              <input type="file" accept="application/pdf" onChange={handleFileChange} id="pdf-protect-input" className="hidden" />
-              <label
-                htmlFor="pdf-protect-input"
-                className="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl cursor-pointer shadow-lg shadow-blue-600/30"
-              >
-                Choose PDF File
-              </label>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between bg-gray-950 border border-gray-800 rounded-2xl p-4 text-xs">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-6 h-6 text-blue-400" />
-                  <div>
-                    <h4 className="font-bold text-white">{file.name}</h4>
-                    <p className="text-gray-400">{(file.size / 1024).toFixed(1)} KB</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setFile(null)}
-                  className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-xs font-bold"
-                >
-                  Change File
-                </button>
-              </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center justify-center gap-2">
+            <Lock className="w-6 h-6 text-amber-400" />
+            <span>PDF Password Encryption Unavailable Offline</span>
+          </h1>
 
-              {/* Password Inputs */}
-              <div className="space-y-4 bg-gray-950 p-5 rounded-2xl border border-gray-800">
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 mb-1 flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-blue-400" /> Set Document Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password..."
-                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 mb-1">Confirm Password</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter password..."
-                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
+          <p className="text-sm text-slate-300 leading-relaxed max-w-xl mx-auto">
+            Because FitMyForm processes 100% of files inside your browser with zero server uploads, standard AES-256 PDF password encryption is not currently supported by our in-browser PDF writer. Rather than giving you an unencrypted file, we disabled this tool to keep your security honest.
+          </p>
 
-              {error && <p className="text-xs text-red-400 font-bold">{error}</p>}
+          <div className="bg-black/40 border border-white/10 rounded-2xl p-4 text-left text-xs text-slate-300 space-y-1.5">
+            <p className="font-bold text-white">Recommended ways to password-protect a PDF locally:</p>
+            <p>• <strong>macOS:</strong> Open PDF in Preview → File → Export → Permissions → Require Password to Open.</p>
+            <p>• <strong>Windows / Linux:</strong> Use LibreOffice Draw or <code className="text-blue-300">qpdf --encrypt</code> locally.</p>
+          </div>
 
-              <button
-                onClick={handleProtect}
-                disabled={isProcessing}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2"
-              >
-                {isProcessing ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Lock className="w-5 h-5" />}
-                <span>Encrypt & Protect PDF Now</span>
-              </button>
-
-              {protectedUrl && (
-                <div className="p-6 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-sm">
-                    <CheckCircle2 className="w-5 h-5" /> PDF Protected & Encrypted!
-                  </div>
-                  <a
-                    href={protectedUrl}
-                    download={`protected_${file.name}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-black text-xs rounded-xl shadow-lg"
-                  >
-                    <Download className="w-4 h-4" /> Download Protected PDF
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/pdf-tools/redact"
+              className="fmf-btn-primary px-5 py-3 text-xs font-bold inline-flex items-center gap-2"
+            >
+              <EyeOff className="w-4 h-4" /> Permanently Redact Sensitive Info
+            </Link>
+            <Link
+              href="/pdf-tools/watermark"
+              className="fmf-btn-secondary px-5 py-3 text-xs font-bold inline-flex items-center gap-2"
+            >
+              <Stamp className="w-4 h-4" /> Add Watermark to PDF
+            </Link>
+          </div>
         </div>
       </main>
 

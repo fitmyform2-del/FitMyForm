@@ -20,7 +20,10 @@ export default function PresetsDirectoryPage() {
       matchesTab &&
       (exam.name.toLowerCase().includes(term) ||
         exam.organization.toLowerCase().includes(term) ||
-        Object.values(exam.documents).some((d) => d && d.title.toLowerCase().includes(term)))
+        exam.description.toLowerCase().includes(term) ||
+        Object.values(exam.documents).some(
+          (d) => d && (d.title.toLowerCase().includes(term) || (d.notes?.toLowerCase().includes(term) ?? false))
+        ))
     );
   });
 
@@ -38,17 +41,17 @@ export default function PresetsDirectoryPage() {
             Competitive Exam <span className="text-blue-400">Photo & Document Specs</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto">
-            Browse official document dimension specifications, file format rules, and KB size limits for over 30+ competitive exams.
+            Browse verified 2025–2026 official document dimension specifications, file format rules, and KB size limits across {EXAM_PRESETS.length} exams & portals.
           </p>
         </div>
 
         {/* Search & Category Filter */}
-        <div className="fmf-panel p-4 space-y-4 max-w-3xl mx-auto">
+        <div className="fmf-panel p-4 space-y-4 max-w-4xl mx-auto">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search exam specs e.g. 'SSC CGL', 'UPSC', 'IBPS PO', 'NEET'..."
+              placeholder="Search exam specs e.g. 'SSC CGL', 'UPSC', 'NEET', 'GATE', 'DSSSB', 'UPPSC', 'PAN', 'US Visa'..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-black/40 text-white pl-10 pr-4 py-2.5 rounded-xl border border-white/10 text-sm focus:outline-none focus:border-blue-500"
@@ -57,12 +60,14 @@ export default function PresetsDirectoryPage() {
 
           <div className="flex flex-wrap gap-1.5 text-xs justify-center">
             {[
-              { id: 'all', label: 'All Exams' },
-              { id: 'national', label: 'National (SSC/UPSC)' },
-              { id: 'banking', label: 'Banking & IBPS' },
+              { id: 'all', label: `All (${EXAM_PRESETS.length})` },
+              { id: 'national', label: 'SSC / UPSC / Defence' },
+              { id: 'admission', label: 'NTA / GATE / CAT / CLAT' },
+              { id: 'banking', label: 'Banking & Insurance' },
               { id: 'railway', label: 'Railway RRB' },
-              { id: 'teaching', label: 'CTET / UPTET' },
-              { id: 'state', label: 'State Exams' }
+              { id: 'teaching', label: 'Teaching (CTET / DSSSB)' },
+              { id: 'state', label: 'State PSC & Police' },
+              { id: 'other', label: 'PAN / Visa / PDF' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -96,10 +101,18 @@ export default function PresetsDirectoryPage() {
               <div className="space-y-3">
                 {Object.entries(exam.documents).map(([key, doc]) => {
                   if (!doc) return null;
+                  const isPdfOnly = doc.format.length === 1 && doc.format[0] === 'PDF';
+                  const docHref = isPdfOnly
+                    ? `/pdf-tools/compress?targetKB=${doc.maxSizeKB}&preset=${encodeURIComponent(exam.id)}&doc=${encodeURIComponent(key)}`
+                    : `/photo-resizer?preset=${encodeURIComponent(exam.id)}&doc=${encodeURIComponent(key)}`;
                   return (
-                    <div key={key} className="bg-black/40 border border-white/10 rounded-xl p-3.5 space-y-1 text-xs">
+                    <Link
+                      key={key}
+                      href={docHref}
+                      className="block bg-black/40 hover:bg-blue-950/30 border border-white/10 hover:border-blue-500/40 rounded-xl p-3.5 space-y-1 text-xs transition-all group"
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white">{doc.title}</span>
+                        <span className="font-bold text-white group-hover:text-blue-300 transition-colors">{doc.title}</span>
                         <span className="font-mono bg-white/[0.08] text-emerald-400 px-2 py-0.5 rounded text-[10px]">
                           {doc.format.join(', ')}
                         </span>
@@ -117,17 +130,28 @@ export default function PresetsDirectoryPage() {
                           {doc.notes}
                         </p>
                       )}
-                    </div>
+                      <div className="pt-1.5 text-[11px] font-bold text-blue-400 group-hover:underline">
+                        Open with these exact specs →
+                      </div>
+                    </Link>
                   );
                 })}
               </div>
 
-              <Link
-                href="/"
-                className="fmf-btn-primary block text-center w-full py-2.5 text-xs font-bold"
-              >
-                Use Requirements in Resizer Tool →
-              </Link>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Link
+                  href={`/exam/${exam.id}`}
+                  className="fmf-btn-primary block text-center py-2.5 text-xs font-bold"
+                >
+                  Open {exam.name.split(' ')[0]} Page →
+                </Link>
+                <Link
+                  href={`/exam-kit?exam=${encodeURIComponent(exam.id)}`}
+                  className="fmf-btn-secondary block text-center py-2.5 text-xs font-bold"
+                >
+                  Batch ZIP Kit
+                </Link>
+              </div>
             </div>
           ))}
         </div>

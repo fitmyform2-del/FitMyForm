@@ -213,14 +213,26 @@ export default function ConvertToJpgClient() {
                 <span>Download JPG Image</span>
               </a>
 
-              <button
-                type="button"
-                onClick={() => setConvertedUrl(null)}
-                className="fmf-btn-secondary px-6 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Convert Another Image</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setConvertedUrl(null)}
+                  className="fmf-btn-secondary px-5 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Adjust Quality</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConvertedUrl(null);
+                    setUploadedFile(null);
+                  }}
+                  className="fmf-btn-secondary px-5 py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Upload Another Image</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

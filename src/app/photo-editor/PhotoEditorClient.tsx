@@ -24,6 +24,44 @@ export default function PhotoEditorClient() {
   });
   const [editedUrl, setEditedUrl] = useState<string | null>(null);
 
+  // Pick up handoff image when user clicks "Open in Photo Editor" from another tool
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('fitmyform_handoff_image');
+      if (!raw) return;
+      sessionStorage.removeItem('fitmyform_handoff_image');
+      const parsed = JSON.parse(raw) as {
+        dataUrl: string;
+        name: string;
+        type: string;
+        sizeKB: number;
+        width: number;
+        height: number;
+      };
+      fetch(parsed.dataUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], parsed.name || 'edited.jpg', { type: parsed.type || 'image/jpeg' });
+          const objectUrl = URL.createObjectURL(blob);
+          setUploadedFile({
+            id: `handoff-${Date.now()}`,
+            file,
+            name: file.name,
+            originalSizeKB: parsed.sizeKB || Number((blob.size / 1024).toFixed(2)),
+            type: file.type,
+            width: parsed.width,
+            height: parsed.height,
+            aspectRatio: parsed.height ? Number((parsed.width / parsed.height).toFixed(4)) : 1,
+            previewUrl: objectUrl,
+            isPdf: false
+          });
+        })
+        .catch(() => {});
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
   const applyPreset = (presetName: string) => {
     switch (presetName) {
       case 'grayscale':

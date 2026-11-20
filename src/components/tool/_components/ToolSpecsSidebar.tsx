@@ -1,8 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, RefreshCw, ArrowRight, AlertCircle, ChevronDown, ChevronUp, Lock, Unlock, Settings2, Sliders } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Sparkles,
+  RefreshCw,
+  ArrowRight,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Unlock,
+  Settings2,
+  Sliders,
+  Maximize2,
+  Minimize2,
+  MoveHorizontal
+} from 'lucide-react';
 import { DocumentRequirements, FileFormat } from '@/types/document';
+import { fromPixels, toPixels, DimensionUnit } from '@/lib/utils/unitConverter';
 import { ToolAdvancedOptions } from './ToolAdvancedOptions';
 
 interface ToolSpecsSidebarProps {
@@ -10,156 +25,296 @@ interface ToolSpecsSidebarProps {
   isProcessing: boolean;
   errorMsg: string | null;
   sourceAspectRatio?: number;
+  originalWidth?: number;
+  originalHeight?: number;
+  defaultLockAspect?: boolean;
+  defaultShowAdvanced?: boolean;
   onRequirementsChange: (reqs: DocumentRequirements) => void;
-  onProcess: () => void;
-  onOpenCropper?: () => void;
+  onProcess: (overrideReqs?: DocumentRequirements) => void;
 }
+
+const UNITS: DimensionUnit[] = ['px', 'cm', 'mm', 'in'];
+
+const QUICK_DIM_PRESETS = [
+  { label: '200×230 (SSC)', w: 200, h: 230 },
+  { label: '350×450 (NTA/RRB)', w: 350, h: 450 },
+  { label: '140×60 (Sign)', w: 140, h: 60 },
+  { label: '600×600 (Visa)', w: 600, h: 600 }
+];
 
 export const ToolSpecsSidebar: React.FC<ToolSpecsSidebarProps> = ({
   requirements,
   isProcessing,
   errorMsg,
   sourceAspectRatio = 1,
+  originalWidth,
+  originalHeight,
+  defaultLockAspect = false,
+  defaultShowAdvanced = false,
   onRequirementsChange,
-  onProcess,
-  onOpenCropper
+  onProcess
 }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [maintainAspect, setMaintainAspect] = useState(true);
-  const [localW, setLocalW] = useState(String(requirements.width || ''));
-  const [localH, setLocalH] = useState(String(requirements.height || ''));
+  const [unit, setUnit] = useState<DimensionUnit>('px');
+  const [dpi, setDpi] = useState<number>(requirements.dpi || 200);
+  const [showAdvanced, setShowAdvanced] = useState(defaultShowAdvanced);
+  const [maintainAspect, setMaintainAspect] = useState(defaultLockAspect);
 
-  React.useEffect(() => {
-    setLocalW(String(requirements.width || ''));
-    setLocalH(String(requirements.height || ''));
-  }, [requirements.width, requirements.height]);
+  const fmtDisplay = (pxVal: number | undefined, u: DimensionUnit, d: number) => {
+    if (!pxVal) return '';
+    return u === 'px' ? String(Math.round(pxVal)) : String(fromPixels(pxVal, u, d));
+  };
 
-  const commitWidth = () => {
-    const w = parseInt(localW, 10);
-    if (!isNaN(w) && w > 0) {
-      const newH = maintainAspect && sourceAspectRatio ? Math.round(w / sourceAspectRatio) : requirements.height;
-      if (newH) setLocalH(String(newH));
-      onRequirementsChange({ ...requirements, width: w, ...(newH ? { height: newH } : {}) });
-    } else {
-      setLocalW(String(requirements.width || ''));
+  const [localW, setLocalW] = useState(() => fmtDisplay(requirements.width, unit, dpi));
+  const [localH, setLocalH] = useState(() => fmtDisplay(requirements.height, unit, dpi));
+
+  useEffect(() => {
+    setLocalW(fmtDisplay(requirements.width, unit, dpi));
+    setLocalH(fmtDisplay(requirements.height, unit, dpi));
+  }, [requirements.width, requirements.height, unit, dpi]);
+
+  const toPx = (raw: string): number | null => {
+    const val = parseFloat(raw);
+    if (isNaN(val) || val <= 0) return null;
+    return Math.max(10, unit === 'px' ? Math.round(val) : toPixels(val, unit, dpi));
+  };
+
+  const handleWidthInput = (raw: string) => {
+    const cleaned = unit === 'px' ? raw.replace(/\D/g, '') : raw.replace(/[^0-9.]/g, '');
+    setLocalW(cleaned);
+    const wPx = toPx(cleaned);
+    if (wPx) {
+      if (maintainAspect && sourceAspectRatio) {
+        const hPx = Math.max(10, Math.round(wPx / sourceAspectRatio));
+        setLocalH(fmtDisplay(hPx, unit, dpi));
+        onRequirementsChange({ ...requirements, width: wPx, height: hPx, dpi });
+      } else {
+        onRequirementsChange({ ...requirements, width: wPx, dpi });
+      }
     }
   };
 
-  const commitHeight = () => {
-    const h = parseInt(localH, 10);
-    if (!isNaN(h) && h > 0) {
-      const newW = maintainAspect && sourceAspectRatio ? Math.round(h * sourceAspectRatio) : requirements.width;
-      if (newW) setLocalW(String(newW));
-      onRequirementsChange({ ...requirements, height: h, ...(newW ? { width: newW } : {}) });
-    } else {
-      setLocalH(String(requirements.height || ''));
+  const handleHeightInput = (raw: string) => {
+    const cleaned = unit === 'px' ? raw.replace(/\D/g, '') : raw.replace(/[^0-9.]/g, '');
+    setLocalH(cleaned);
+    const hPx = toPx(cleaned);
+    if (hPx) {
+      if (maintainAspect && sourceAspectRatio) {
+        const wPx = Math.max(10, Math.round(hPx * sourceAspectRatio));
+        setLocalW(fmtDisplay(wPx, unit, dpi));
+        onRequirementsChange({ ...requirements, width: wPx, height: hPx, dpi });
+      } else {
+        onRequirementsChange({ ...requirements, height: hPx, dpi });
+      }
     }
   };
 
   const applyPercentResize = (pct: number) => {
-    const curW = requirements.width || 800;
-    const newW = Math.round((curW * pct) / 100);
-    const newH = Math.round(newW / (sourceAspectRatio || 1));
+    const baseW = originalWidth || requirements.width || 800;
+    const baseH = originalHeight || requirements.height || Math.round(baseW / (sourceAspectRatio || 1));
+    const newW = Math.max(10, Math.round((baseW * pct) / 100));
+    const newH = Math.max(10, Math.round((baseH * pct) / 100));
     onRequirementsChange({ ...requirements, width: newW, height: newH });
   };
 
-  const applyQuickSize = (minKB: number, maxKB: number) => {
-    onRequirementsChange({ ...requirements, minSizeKB: minKB, maxSizeKB: maxKB });
+  const handleSubmit = () => {
+    const wPx = toPx(localW) ?? requirements.width;
+    const hPx = toPx(localH) ?? requirements.height;
+    const synced: DocumentRequirements = { ...requirements, width: wPx, height: hPx, dpi };
+    onRequirementsChange(synced);
+    onProcess(synced);
   };
 
   return (
-    <div className="fmf-panel p-6 space-y-5">
-      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+    <div className="fmf-panel p-5 sm:p-6 space-y-5">
+      {/* Header + Unit Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.08] pb-3.5">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-blue-400" />
-          <h3 className="font-extrabold text-white text-sm">Resize & Format Options</h3>
-        </div>
-        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-          Simple Mode
-        </span>
-      </div>
-
-      {/* Simple Mode: Dimensions in px */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-slate-300">Dimensions (Pixels)</label>
-          <button
-            type="button"
-            onClick={() => setMaintainAspect(!maintainAspect)}
-            className={`text-[11px] font-semibold flex items-center gap-1 px-2 py-1 rounded-md transition-colors cursor-pointer ${
-              maintainAspect ? 'text-blue-400 bg-blue-500/10' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            {maintainAspect ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-            <span>Lock Aspect Ratio</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Width (px)</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={localW}
-              onChange={(e) => setLocalW(e.target.value.replace(/\D/g, ''))}
-              onBlur={commitWidth}
-              onKeyDown={(e) => e.key === 'Enter' && commitWidth()}
-              placeholder="e.g. 200"
-              className="w-full touch-target px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white font-mono text-sm focus:border-blue-500 focus:outline-none"
-            />
+          <div className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <Sliders className="w-3.5 h-3.5" />
           </div>
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Height (px)</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={localH}
-              onChange={(e) => setLocalH(e.target.value.replace(/\D/g, ''))}
-              onBlur={commitHeight}
-              onKeyDown={(e) => e.key === 'Enter' && commitHeight()}
-              placeholder="e.g. 230"
-              className="w-full touch-target px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white font-mono text-sm focus:border-blue-500 focus:outline-none"
-            />
-          </div>
+          <h3 className="font-extrabold text-white text-sm">Resize & Export Inspector</h3>
         </div>
 
-        {/* Quick Percentage Chips */}
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Quick Scale:</span>
-          {[25, 50, 75, 100].map((pct) => (
+        {/* Unit Pill Toggle */}
+        <div className="flex items-center bg-black/50 border border-white/10 rounded-lg p-0.5 text-[11px] font-mono">
+          {UNITS.map((u) => (
             <button
-              key={pct}
+              key={u}
               type="button"
-              onClick={() => applyPercentResize(pct)}
-              className="px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-bold text-slate-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+              onClick={() => setUnit(u)}
+              className={`px-2 py-1 rounded-md font-bold uppercase transition-colors cursor-pointer ${
+                unit === u ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
             >
-              {pct}%
+              {u}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Simple Target Size Presets */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-300">Target KB Size Preset</label>
+      {/* Dimensions Inputs + Aspect Lock */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-200">
+            Output Dimensions ({unit.toUpperCase()})
+          </label>
+          <button
+            type="button"
+            onClick={() => setMaintainAspect(!maintainAspect)}
+            className={`text-[11px] font-semibold flex items-center gap-1 px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+              maintainAspect
+                ? 'text-blue-300 bg-blue-500/15 border-blue-500/35'
+                : 'text-slate-400 hover:text-white bg-white/[0.03] border-white/10'
+            }`}
+          >
+            {maintainAspect ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+            <span>{maintainAspect ? 'Ratio Locked' : 'Free Ratio'}</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-black/35 border border-white/10 rounded-xl p-2.5 focus-within:border-blue-500 transition-colors">
+            <span className="text-[10px] text-slate-400 uppercase font-bold block">Width ({unit})</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={localW}
+              onChange={(e) => handleWidthInput(e.target.value)}
+              onBlur={() => setLocalW(fmtDisplay(requirements.width, unit, dpi))}
+              placeholder={unit === 'px' ? '200' : '3.5'}
+              className="w-full bg-transparent text-white font-mono font-bold text-base focus:outline-none mt-0.5"
+            />
+          </div>
+          <div className="bg-black/35 border border-white/10 rounded-xl p-2.5 focus-within:border-blue-500 transition-colors">
+            <span className="text-[10px] text-slate-400 uppercase font-bold block">Height ({unit})</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={localH}
+              onChange={(e) => handleHeightInput(e.target.value)}
+              onBlur={() => setLocalH(fmtDisplay(requirements.height, unit, dpi))}
+              placeholder={unit === 'px' ? '230' : '4.5'}
+              className="w-full bg-transparent text-white font-mono font-bold text-base focus:outline-none mt-0.5"
+            />
+          </div>
+        </div>
+
+        {unit !== 'px' && (
+          <div className="flex items-center justify-between text-[11px] bg-blue-500/10 border border-blue-500/20 rounded-xl px-3 py-2">
+            <span className="text-blue-200 font-mono">
+              = {requirements.width || 0} × {requirements.height || 0} px
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400">DPI:</span>
+              {[150, 200, 300].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDpi(d)}
+                  className={`px-1.5 py-0.5 rounded font-mono font-bold cursor-pointer ${
+                    dpi === d ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Scale + Common Dimensions */}
+        <div className="space-y-2 pt-0.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase mr-0.5">Scale:</span>
+            {[25, 50, 75, 100].map((pct) => (
+              <button
+                key={pct}
+                type="button"
+                onClick={() => applyPercentResize(pct)}
+                className="px-2 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-[11px] font-bold text-slate-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+              >
+                {pct}%
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_DIM_PRESETS.map((p) => {
+              const active = requirements.width === p.w && requirements.height === p.h;
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => onRequirementsChange({ ...requirements, width: p.w, height: p.h })}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition-colors cursor-pointer ${
+                    active
+                      ? 'bg-blue-600/25 border-blue-500/50 text-blue-200'
+                      : 'bg-white/[0.03] border-white/[0.08] text-slate-400 hover:text-white hover:bg-white/[0.07]'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Fit Mode Selector with Visual Icons */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-slate-200">Framing Mode</label>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: '20–50 KB (SSC)', min: 20, max: 50 },
+            { id: 'fill', label: 'Fill & Crop', desc: 'Edge-to-edge', icon: Maximize2 },
+            { id: 'fit', label: 'Fit + Pad', desc: 'Keep full image', icon: Minimize2 },
+            { id: 'stretch', label: 'Stretch', desc: 'Exact box fit', icon: MoveHorizontal }
+          ].map((m) => {
+            const Icon = m.icon;
+            const active = requirements.cropMode === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onRequirementsChange({ ...requirements, cropMode: m.id as DocumentRequirements['cropMode'] })}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                  active
+                    ? 'bg-blue-600/25 border-blue-400 text-white shadow-sm'
+                    : 'bg-white/[0.03] border-white/10 text-slate-300 hover:bg-white/[0.07]'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 mb-1 ${active ? 'text-blue-300' : 'text-slate-400'}`} />
+                <div className="text-[11px] font-bold leading-tight">{m.label}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{m.desc}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Target KB Size */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-200">Target File Size</label>
+          <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-md">
+            {requirements.minSizeKB}–{requirements.maxSizeKB} KB
+          </span>
+        </div>
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { label: '10–20 KB', min: 10, max: 20 },
+            { label: '20–50 KB', min: 20, max: 50 },
             { label: '50–100 KB', min: 50, max: 100 },
-            { label: '100–200 KB', min: 100, max: 200 }
+            { label: '20–300 KB', min: 20, max: 300 }
           ].map((preset) => {
             const isSelected = requirements.minSizeKB === preset.min && requirements.maxSizeKB === preset.max;
             return (
               <button
                 key={preset.label}
                 type="button"
-                onClick={() => applyQuickSize(preset.min, preset.max)}
-                className={`py-2 px-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                onClick={() => onRequirementsChange({ ...requirements, minSizeKB: preset.min, maxSizeKB: preset.max })}
+                className={`py-2 px-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                    ? 'bg-blue-600/30 border-blue-400 text-white'
                     : 'bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/[0.08]'
                 }`}
               >
@@ -171,10 +326,10 @@ export const ToolSpecsSidebar: React.FC<ToolSpecsSidebarProps> = ({
       </div>
 
       {/* Output Format */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-300">Format</label>
-        <div className="grid grid-cols-3 gap-2">
-          {(['JPG', 'PNG', 'PDF'] as FileFormat[]).map((fmt) => (
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-slate-200">Output Format</label>
+        <div className="grid grid-cols-4 gap-2">
+          {(['JPG', 'PNG', 'WEBP', 'PDF'] as FileFormat[]).map((fmt) => (
             <button
               key={fmt}
               type="button"
@@ -200,9 +355,9 @@ export const ToolSpecsSidebar: React.FC<ToolSpecsSidebarProps> = ({
         >
           <span className="flex items-center gap-1.5">
             <Settings2 className="w-3.5 h-3.5" />
-            <span>Advanced options</span>
+            <span>Custom KB, Name/Date Stamp & Signature Clean-up</span>
           </span>
-          {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {showAdvanced ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />}
         </button>
 
         {showAdvanced && (
@@ -216,19 +371,19 @@ export const ToolSpecsSidebar: React.FC<ToolSpecsSidebarProps> = ({
       {/* Primary Action Button */}
       <button
         type="button"
-        onClick={onProcess}
+        onClick={handleSubmit}
         disabled={isProcessing}
         className="w-full fmf-btn-primary py-4 text-sm font-black flex items-center justify-center gap-2 cursor-pointer"
       >
         {isProcessing ? (
           <>
             <RefreshCw className="w-4 h-4 animate-spin" />
-            <span>Processing Image...</span>
+            <span>Formatting & Compressing...</span>
           </>
         ) : (
           <>
             <Sparkles className="w-4 h-4 text-amber-300" />
-            <span>Format Document Now</span>
+            <span>Export Formatted {requirements.format}</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}

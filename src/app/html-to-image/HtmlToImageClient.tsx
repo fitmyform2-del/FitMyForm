@@ -5,7 +5,7 @@ import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { renderHtmlToCanvas } from '@/lib/image/editorTools';
-import { Code, Download, RefreshCw, CheckCircle2, Sparkles } from 'lucide-react';
+import { Code, Download, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const DEFAULT_HTML = `<div style="text-align: center; font-family: sans-serif;">
   <h1 style="color: #6366f1; font-size: 36px; margin-bottom: 8px;">HTML to Image</h1>
@@ -23,40 +23,32 @@ export default function HtmlToImageClient() {
   const [hStr, setHStr] = useState('450');
   const [bgColor, setBgColor] = useState('#0d121e');
   const [renderedUrl, setRenderedUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const processRender = async () => {
-    setIsProcessing(true);
-    const parsedW = parseInt(wStr, 10);
-    const parsedH = parseInt(hStr, 10);
-    const finalW = isNaN(parsedW) || parsedW < 50 ? 800 : parsedW;
-    const finalH = isNaN(parsedH) || parsedH < 50 ? 450 : parsedH;
-    setCanvasWidth(finalW);
-    setCanvasHeight(finalH);
-    setWStr(String(finalW));
-    setHStr(String(finalH));
-    try {
-      const canvas = await renderHtmlToCanvas(htmlContent, finalW, finalH, bgColor);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          if (renderedUrl) URL.revokeObjectURL(renderedUrl);
-          setRenderedUrl(URL.createObjectURL(blob));
-        }
-        setIsProcessing(false);
-      }, 'image/png', 0.95);
-    } catch (e) {
-      console.error(e);
-      setIsProcessing(false);
-    }
-  };
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    setTimeout(() => {
-      if (active) processRender();
-    }, 0);
+    const timer = setTimeout(async () => {
+      try {
+        setRenderError(null);
+        const canvas = await renderHtmlToCanvas(htmlContent, canvasWidth, canvasHeight, bgColor);
+        canvas.toBlob((blob) => {
+          if (blob && active) {
+            setRenderedUrl((prev) => {
+              if (prev) URL.revokeObjectURL(prev);
+              return URL.createObjectURL(blob);
+            });
+          }
+        }, 'image/png', 0.95);
+      } catch (e: unknown) {
+        if (active) {
+          setRenderError(e instanceof Error ? e.message : 'Unable to render HTML markup.');
+        }
+      }
+    }, 220);
+
     return () => {
       active = false;
+      clearTimeout(timer);
     };
   }, [htmlContent, canvasWidth, canvasHeight, bgColor]);
 
@@ -149,6 +141,13 @@ export default function HtmlToImageClient() {
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>Rendered Image Preview</span>
             </h2>
+
+            {renderError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{renderError}</span>
+              </div>
+            )}
 
             {renderedUrl ? (
               <div className="bg-[#0d121e] border border-emerald-500/30 rounded-3xl p-6 space-y-6 shadow-2xl backdrop-blur-2xl">

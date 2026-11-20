@@ -8,7 +8,8 @@
     "build:cf": "opennextjs-cloudflare build",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --import ./tests/alias-loader.mjs --test tests/*.test.ts"
   },
   "dependencies": {
     "@types/jszip": "^3.4.0",

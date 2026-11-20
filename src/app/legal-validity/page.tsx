@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { FileText, CheckCircle2, Globe, Scale } from 'lucide-react';
+import { Globe, Scale } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Legal Validity of Electronic Signatures - Enforceability Guide',

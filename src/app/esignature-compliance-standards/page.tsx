@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { Award, ShieldCheck, CheckCircle2, ArrowRight, Lock, FileText, Globe } from 'lucide-react';
+import { Award, CheckCircle2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignature Compliance Standards - eIDAS, ESIGN Act & IT Act Guide',

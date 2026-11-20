@@ -1,13 +1,18 @@
 import { PDFDocument, degrees } from 'pdf-lib';
+import { loadPdfDocument, renderPdfPageToCanvas } from '../pdfjsLoader';
 
-/** ROTATE PDF */
-export async function rotatePdf(file: File, pageRotations: Record<number, number>): Promise<Blob> {
+/** ROTATE PDF (supports specific page map or rotateAllAngle) */
+export async function rotatePdf(
+  file: File,
+  pageRotations: Record<number, number>,
+  rotateAllAngle?: number
+): Promise<Blob> {
   const arrayBuffer = await file.arrayBuffer();
   const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
   const pages = pdfDoc.getPages();
 
   pages.forEach((page, idx) => {
-    const additionalAngle = pageRotations[idx] || 0;
+    const additionalAngle = rotateAllAngle ?? pageRotations[idx] ?? 0;
     if (additionalAngle !== 0) {
       const currentRotation = page.getRotation().angle;
       const newRotation = (currentRotation + additionalAngle) % 360;
@@ -46,23 +51,35 @@ export async function organizePdf(
   return new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
 }
 
-/** PROTECT / ENCRYPT PDF */
-export async function protectPdf(file: File, _userPass: string, _ownerPass?: string): Promise<Blob> {
+/**
+ * UNLOCK PDF (Real decryption via pdf.js using the user's password)
+ * Decrypts password-protected PDFs in browser memory and saves a password-free copy.
+ */
+export async function unlockPdf(file: File, password: string): Promise<Blob> {
   const arrayBuffer = await file.arrayBuffer();
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  // Validate password & decrypt via pdf.js (throws PasswordException on wrong/missing password)
+  const pdfJsDoc = await loadPdfDocument(arrayBuffer, password || undefined);
 
-  const pdfBytes = await pdfDoc.save({
-    useObjectStreams: true,
-  });
+  const outPdf = await PDFDocument.create();
+  outPdf.setProducer('FitMyForm PDF Unlocker');
 
-  return new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
-}
+  for (let i = 1; i <= pdfJsDoc.numPages; i++) {
+    const page = await pdfJsDoc.getPage(i);
+    const origViewport = page.getViewport({ scale: 1 });
+    const canvas = await renderPdfPageToCanvas(pdfJsDoc, i, 2.0);
+    const jpgBlob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Failed to render decrypted page'))), 'image/jpeg', 0.94);
+    });
+    const embedded = await outPdf.embedJpg(await jpgBlob.arrayBuffer());
+    const outPage = outPdf.addPage([origViewport.width, origViewport.height]);
+    outPage.drawImage(embedded, {
+      x: 0,
+      y: 0,
+      width: origViewport.width,
+      height: origViewport.height
+    });
+  }
 
-/** UNLOCK PDF */
-export async function unlockPdf(file: File, _pass: string): Promise<Blob> {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-
-  const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+  const pdfBytes = await outPdf.save({ useObjectStreams: true });
   return new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
 }

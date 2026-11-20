@@ -1,12 +1,12 @@
-import { ExamPreset } from '@/types/presets';
+import type { ExamPreset } from '@/types/presets';
 
 export const NATIONAL_EXAM_PRESETS: ExamPreset[] = [
   {
     id: 'ssc-cgl',
-    name: 'SSC (CGL / CHSL / MTS / GD)',
+    name: 'SSC (CGL / CHSL / MTS / GD / CPO / JE)',
     category: 'national',
-    organization: 'Staff Selection Commission',
-    description: 'Official specifications for SSC online application forms.',
+    organization: 'Staff Selection Commission (ssc.gov.in)',
+    description: 'Official 2025–2026 specifications for SSC online application forms.',
     documents: {
       photo: {
         title: 'SSC Passport Photo',
@@ -19,7 +19,7 @@ export const NATIONAL_EXAM_PRESETS: ExamPreset[] = [
         dpi: 200,
         bgColor: '#FFFFFF',
         defaultCropMode: 'fill',
-        notes: 'White background mandatory. Dimensions 3.5 cm x 4.5 cm (200 x 230 px).'
+        notes: '3.5 × 4.5 cm (200×230 px), plain white background, no caps/glasses. Note: ssc.gov.in also uses live webcam capture.'
       },
       signature: {
         title: 'SSC Signature',
@@ -31,20 +31,20 @@ export const NATIONAL_EXAM_PRESETS: ExamPreset[] = [
         height: 60,
         dpi: 200,
         bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Black ink signature on white paper. Dimensions 4.0 cm x 2.0 cm (140 x 60 px).'
+        defaultCropMode: 'fit',
+        notes: '4.0–6.0 × 2.0 cm, strictly 10–20 KB JPG. Black/blue ink on white paper; running hand (NO ALL CAPS).'
       }
     }
   },
   {
     id: 'upsc-civil-services',
-    name: 'UPSC (IAS / IPS / NDA / CDS)',
+    name: 'UPSC (CSE / IAS / NDA / CDS / CAPF / EPFO)',
     category: 'national',
-    organization: 'Union Public Service Commission',
-    description: 'Official dimensions and size requirements for UPSC forms.',
+    organization: 'Union Public Service Commission (upsconline.nic.in)',
+    description: 'Official OTR & exam specifications for UPSC Civil Services, NDA, CDS, and EPFO.',
     documents: {
       photo: {
-        title: 'UPSC Photograph',
+        title: 'UPSC Photograph (with Name & Date)',
         documentType: 'photo',
         format: ['JPG', 'JPEG'],
         minSizeKB: 20,
@@ -57,7 +57,7 @@ export const NATIONAL_EXAM_PRESETS: ExamPreset[] = [
         maxHeight: 1000,
         bgColor: '#FFFFFF',
         defaultCropMode: 'fill',
-        notes: 'Min 350x350 px, Max 1000x1000 px. White background with name and date.'
+        notes: 'Square 350×350 to 1000×1000 px, 20–300 KB. Face 75% of frame; Candidate Name & Photo Date mandatory at bottom.'
       },
       signature: {
         title: 'UPSC Signature',
@@ -72,159 +72,135 @@ export const NATIONAL_EXAM_PRESETS: ExamPreset[] = [
         minHeight: 350,
         maxHeight: 1000,
         bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Dark ink signature on plain white paper.'
+        defaultCropMode: 'fit',
+        notes: '350×350 to 1000×1000 px, 20–300 KB JPG. Black/dark blue ink on white paper (CSE requires triple signature vertically).'
       },
       idProof: {
-        title: 'UPSC Photo ID Proof (Aadhaar/Voter)',
+        title: 'UPSC Photo ID Proof (Aadhaar / PAN / Voter)',
         documentType: 'aadhaar',
         format: ['PDF'],
         minSizeKB: 20,
         maxSizeKB: 300,
-        notes: 'PDF format only. Size must be between 20 KB and 300 KB.'
-      }
-    }
-  },
-  {
-    id: 'ibps-banking',
-    name: 'Banking (IBPS PO / Clerk / SBI PO)',
-    category: 'banking',
-    organization: 'Institute of Banking Personnel Selection / SBI',
-    description: 'Standard dimensions for all IBPS and SBI recruitment forms.',
-    documents: {
-      photo: {
-        title: 'IBPS Passport Photo',
-        documentType: 'photo',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 20,
-        maxSizeKB: 50,
-        width: 200,
-        height: 230,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Size 20 KB to 50 KB. 200 x 230 pixels.'
-      },
-      signature: {
-        title: 'IBPS Signature',
-        documentType: 'signature',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 10,
-        maxSizeKB: 20,
-        width: 140,
-        height: 60,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Black ink only. Size 10 KB to 20 KB.'
-      },
-      thumb: {
-        title: 'IBPS Left Thumb Impression',
-        documentType: 'thumb',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 20,
-        maxSizeKB: 50,
-        width: 240,
-        height: 240,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Blue or black ink on white paper. 240 x 240 pixels (3 cm x 3 cm).'
-      },
-      declaration: {
-        title: 'IBPS Handwritten Declaration',
-        documentType: 'declaration',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 50,
-        maxSizeKB: 100,
-        width: 800,
-        height: 400,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Handwritten statement in English on white paper with black ink. 800 x 400 pixels.'
+        notes: 'Clear PDF scan strictly between 20 KB and 300 KB.'
       }
     }
   },
   {
     id: 'rrb-railway',
-    name: 'Railway (RRB NTPC / Group D / ALP)',
+    name: 'Railway RRB (NTPC / Group D / ALP / JE / RPF)',
     category: 'railway',
-    organization: 'Railway Recruitment Board',
-    description: 'Photo and signature requirements for Indian Railways RRB online forms.',
+    organization: 'Railway Recruitment Board (rrbapply.gov.in)',
+    description: 'Updated 2025–2026 RRB portal specifications for NTPC, ALP, Group D, JE & RPF.',
     documents: {
+      signature: {
+        title: 'RRB Signature (30–49 KB)',
+        documentType: 'signature',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 30,
+        maxSizeKB: 49,
+        width: 140,
+        height: 60,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fit',
+        notes: 'Updated rrbapply.gov.in rule: strictly 30–49 KB JPG, min 140×60 px (35×20 mm), black ink in running hand (no block letters).'
+      },
       photo: {
         title: 'RRB Passport Photo',
         documentType: 'photo',
         format: ['JPG', 'JPEG'],
-        minSizeKB: 20,
-        maxSizeKB: 50,
+        minSizeKB: 30,
+        maxSizeKB: 70,
         width: 350,
         height: 450,
         bgColor: '#FFFFFF',
         defaultCropMode: 'fill',
-        notes: 'Plain light/white background. 35 mm x 45 mm (350 x 450 px).'
+        notes: '35 × 45 mm (350×450 px), plain white background. Note: New rrbapply.gov.in cycles use live webcam photo capture.'
       },
-      signature: {
-        title: 'RRB Signature',
-        documentType: 'signature',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 10,
-        maxSizeKB: 20,
-        width: 140,
-        height: 60,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Running handwriting signature (not in block letters).'
-      }
-    }
-  },
-  {
-    id: 'nta-neet-jee',
-    name: 'NTA (NEET UG / JEE Main / CUET)',
-    category: 'national',
-    organization: 'National Testing Agency',
-    description: 'Document specifications for NTA competitive exams.',
-    documents: {
-      photo: {
-        title: 'NTA Passport Photograph',
-        documentType: 'photo',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 10,
-        maxSizeKB: 200,
-        width: 350,
-        height: 450,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'White background. 80% face coverage showing ears clearly.'
-      },
-      signature: {
-        title: 'NTA Signature',
-        documentType: 'signature',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 4,
-        maxSizeKB: 30,
-        width: 140,
-        height: 60,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Black ink signature on white paper.'
-      },
-      thumb: {
-        title: 'NTA Finger & Thumb Impressions',
-        documentType: 'thumb',
-        format: ['JPG', 'JPEG'],
-        minSizeKB: 10,
-        maxSizeKB: 200,
-        width: 400,
-        height: 200,
-        bgColor: '#FFFFFF',
-        defaultCropMode: 'fill',
-        notes: 'Left & Right hand fingers & thumb impressions on white paper.'
-      },
-      idProof: {
-        title: 'Category / PwD / ID Certificate',
+      certificate: {
+        title: 'RRB SC / ST / EWS Certificate (PDF)',
         documentType: 'certificate',
         format: ['PDF'],
         minSizeKB: 50,
         maxSizeKB: 300,
-        notes: 'Clear scan in PDF format between 50 KB and 300 KB.'
+        notes: 'PDF scan under 300 KB for fee concession / category verification.'
+      }
+    }
+  },
+  {
+    id: 'afcat-defence',
+    name: 'AFCAT (Indian Air Force)',
+    category: 'national',
+    organization: 'Indian Air Force / C-DAC',
+    description: 'Official C-DAC AFCAT photo, signature, and thumb impression upload rules.',
+    documents: {
+      photo: {
+        title: 'AFCAT Passport Photo',
+        documentType: 'photo',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 100,
+        maxSizeKB: 200,
+        width: 350,
+        height: 450,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fill',
+        notes: 'Strictly 100–200 KB JPG on light/white background (save as Passport Photograph.jpg).'
+      },
+      signature: {
+        title: 'AFCAT Signature',
+        documentType: 'signature',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 80,
+        maxSizeKB: 150,
+        width: 280,
+        height: 100,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fit',
+        notes: '80–150 KB JPG on white paper (save as Signature.jpg).'
+      },
+      thumb: {
+        title: 'AFCAT Thumb Impression',
+        documentType: 'thumb',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 50,
+        maxSizeKB: 100,
+        width: 240,
+        height: 240,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fit',
+        notes: 'Left thumb (men) / Right thumb (women), 50–100 KB JPG (save as Thumb Impression.jpg).'
+      }
+    }
+  },
+  {
+    id: 'agniveer-defence',
+    name: 'Agniveer (Indian Army / Navy / Air Force)',
+    category: 'national',
+    organization: 'Join Indian Army / Agnipath Scheme',
+    description: 'Document formatting rules for Indian Army, Navy, and Air Force Agniveer forms.',
+    documents: {
+      photo: {
+        title: 'Agniveer Passport Photo',
+        documentType: 'photo',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 10,
+        maxSizeKB: 50,
+        width: 200,
+        height: 230,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fill',
+        notes: '10–50 KB JPG, plain light/white background, recent front-facing portrait.'
+      },
+      signature: {
+        title: 'Agniveer Signature',
+        documentType: 'signature',
+        format: ['JPG', 'JPEG'],
+        minSizeKB: 5,
+        maxSizeKB: 20,
+        width: 140,
+        height: 60,
+        bgColor: '#FFFFFF',
+        defaultCropMode: 'fit',
+        notes: '5–20 KB JPG, black/blue ink on plain white paper.'
       }
     }
   }

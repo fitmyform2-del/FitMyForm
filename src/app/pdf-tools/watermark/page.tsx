@@ -11,7 +11,7 @@ export default function WatermarkPdfPage() {
   const [file, setFile] = useState<File | null>(null);
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [opacity, setOpacity] = useState<number>(0.3);
-  const [rotation, setRotation] = useState<number>(-30);
+  const [rotation] = useState<number>(-30);
   const [position, setPosition] = useState<WatermarkOptions['position']>('center');
   const [color, setColor] = useState('#3b82f6');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -111,7 +111,7 @@ export default function WatermarkPdfPage() {
                     <label className="block text-xs font-bold text-gray-400 mb-1">Position</label>
                     <select
                       value={position}
-                      onChange={(e) => setPosition(e.target.value as any)}
+                      onChange={(e) => setPosition(e.target.value as WatermarkOptions['position'])}
                       className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                     >
                       <option value="center">Center</option>

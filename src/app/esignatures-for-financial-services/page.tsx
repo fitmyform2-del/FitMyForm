@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
-import { Landmark, ArrowRight, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
+import { Landmark, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'eSignatures for Financial Services - Banking, Loans & Wealth Management',

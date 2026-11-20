@@ -11,7 +11,7 @@ interface SignFieldPaletteProps {
   onOpenModal: () => void;
   onAddField: (type: SignField['type'], defaultValue?: string) => void;
   onRemoveField: (id: string) => void;
-  onUpdateField: (id: string, key: keyof SignField, val: any) => void;
+  onUpdateField: (id: string, key: keyof SignField, val: string | number | undefined) => void;
   onAuditTrailChange: (val: boolean) => void;
 }
 

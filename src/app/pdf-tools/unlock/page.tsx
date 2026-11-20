@@ -28,10 +28,16 @@ export default function UnlockPdfPage() {
     setError(null);
     try {
       const blob = await unlockPdf(file, password);
+      if (unlockedUrl) URL.revokeObjectURL(unlockedUrl);
       setUnlockedUrl(URL.createObjectURL(blob));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Unlock error:', err);
-      setError('Failed to unlock PDF. Please check if password is correct.');
+      const name = err && typeof err === 'object' && 'name' in err ? String((err as { name: string }).name) : '';
+      if (name === 'PasswordException') {
+        setError('Incorrect or missing password. Please enter the exact password required to open this PDF.');
+      } else {
+        setError('Failed to unlock PDF. Please check if the file is valid and the password is correct.');
+      }
     } finally {
       setIsProcessing(false);
     }

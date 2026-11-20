@@ -35,24 +35,10 @@ export function PdfImportModal({
           setIsLoading(false);
         };
         reader.readAsDataURL(selected);
-      } else if (selected.type.includes('pdf')) {
-        // Dynamic import pdfjs-dist
-        const arrayBuffer = await selected.arrayBuffer();
-        const pdfjs = await import('pdfjs-dist/build/pdf.mjs');
-        const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
-
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) throw new Error('Could not get canvas 2d context');
-
-        // Render PDF page into canvas
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (page as any).render({ canvasContext: ctx, viewport }).promise;
+      } else if (selected.type.includes('pdf') || selected.name.toLowerCase().endsWith('.pdf')) {
+        const { loadPdfDocument, renderPdfPageToCanvas } = await import('@/lib/pdf/pdfjsLoader');
+        const pdf = await loadPdfDocument(selected);
+        const canvas = await renderPdfPageToCanvas(pdf, 1, 1.75);
         const dataUrl = canvas.toDataURL('image/png', 0.95);
         setPreviewUrl(dataUrl);
         setIsLoading(false);

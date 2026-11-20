@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/header/Navbar';
 import { Footer } from '@/components/footer/Footer';
 import { imagesToPdf, JpgToPdfOptions } from '@/lib/pdf/pdfTools';
-import { FileImage, Upload, Download, RefreshCw, ArrowLeft, CheckCircle2, MoveUp, MoveDown, Trash2 } from 'lucide-react';
+import { FileImage, Upload, Download, RefreshCw, ArrowLeft, CheckCircle2, Trash2 } from 'lucide-react';
 
 export default function JpgToPdfPage() {
   const [images, setImages] = useState<File[]>([]);
@@ -76,7 +76,7 @@ export default function JpgToPdfPage() {
                   <label className="block text-xs font-bold text-gray-400 mb-1">Page Size</label>
                   <select
                     value={layout.pageSize}
-                    onChange={(e) => setLayout({ ...layout, pageSize: e.target.value as any })}
+                    onChange={(e) => setLayout({ ...layout, pageSize: e.target.value as JpgToPdfOptions['pageSize'] })}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                   >
                     <option value="a4">A4 Standard</option>
@@ -88,7 +88,7 @@ export default function JpgToPdfPage() {
                   <label className="block text-xs font-bold text-gray-400 mb-1">Orientation</label>
                   <select
                     value={layout.orientation}
-                    onChange={(e) => setLayout({ ...layout, orientation: e.target.value as any })}
+                    onChange={(e) => setLayout({ ...layout, orientation: e.target.value as JpgToPdfOptions['orientation'] })}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                   >
                     <option value="portrait">Portrait</option>
@@ -100,7 +100,7 @@ export default function JpgToPdfPage() {
                   <label className="block text-xs font-bold text-gray-400 mb-1">Margin</label>
                   <select
                     value={layout.margin}
-                    onChange={(e) => setLayout({ ...layout, margin: e.target.value as any })}
+                    onChange={(e) => setLayout({ ...layout, margin: e.target.value as JpgToPdfOptions['margin'] })}
                     className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"
                   >
                     <option value="none">No Margin</option>

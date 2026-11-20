@@ -8,7 +8,7 @@ import { ExamPreset, SingleDocSpec } from '@/types/presets';
 interface PresetSelectorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectRequirement: (docSpec: SingleDocSpec, exam: ExamPreset) => void;
+  onSelectRequirement: (docSpec: SingleDocSpec, exam: ExamPreset, docKey: string) => void;
 }
 
 export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
@@ -29,11 +29,12 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
 
       const nameMatch = exam.name.toLowerCase().includes(term);
       const orgMatch = exam.organization.toLowerCase().includes(term);
+      const descMatch = exam.description.toLowerCase().includes(term);
       const docMatch = Object.values(exam.documents).some(
-        (doc) => doc && doc.title.toLowerCase().includes(term)
+        (doc) => doc && (doc.title.toLowerCase().includes(term) || (doc.notes?.toLowerCase().includes(term) ?? false))
       );
 
-      return matchesCategory && (nameMatch || orgMatch || docMatch);
+      return matchesCategory && (nameMatch || orgMatch || descMatch || docMatch);
     });
   }, [searchTerm, selectedCategory]);
 
@@ -85,13 +86,14 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
 
           <div className="flex flex-wrap gap-2 text-xs">
             {[
-              { id: 'all', label: 'All Exams' },
-              { id: 'national', label: 'National (SSC/UPSC)' },
-              { id: 'banking', label: 'Banking & IBPS' },
+              { id: 'all', label: `All (${EXAM_PRESETS.length})` },
+              { id: 'national', label: 'SSC / UPSC / Defence' },
+              { id: 'admission', label: 'NTA / GATE / CAT / CLAT' },
+              { id: 'banking', label: 'Banking & Insurance' },
               { id: 'railway', label: 'Railway RRB' },
-              { id: 'teaching', label: 'CTET / UPTET' },
-              { id: 'state', label: 'State Exams' },
-              { id: 'other', label: 'General / PDF' }
+              { id: 'teaching', label: 'Teaching (CTET / DSSSB)' },
+              { id: 'state', label: 'State PSC & Police' },
+              { id: 'other', label: 'PAN / Visa / PDF' }
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -137,7 +139,7 @@ export const PresetSelectorModal: React.FC<PresetSelectorModalProps> = ({
                       <div
                         key={key}
                         className="antigravity-card-3d p-4 rounded-xl flex flex-col justify-between cursor-pointer group"
-                        onClick={() => onSelectRequirement(doc, exam)}
+                        onClick={() => onSelectRequirement(doc, exam, key)}
                       >
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">

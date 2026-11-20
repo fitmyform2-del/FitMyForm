@@ -37,8 +37,10 @@ export default function WatermarkImageClient() {
       const canvas = await watermarkImageCanvas(img, options);
       canvas.toBlob((blob) => {
         if (blob) {
-          if (watermarkedUrl) URL.revokeObjectURL(watermarkedUrl);
-          setWatermarkedUrl(URL.createObjectURL(blob));
+          setWatermarkedUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return URL.createObjectURL(blob);
+          });
         }
       }, uploadedFile.file.type || 'image/jpeg', 0.95);
     } catch (err) {
@@ -47,12 +49,12 @@ export default function WatermarkImageClient() {
   }, [uploadedFile, options]);
 
   useEffect(() => {
-    let active = true;
-    if (uploadedFile) {
-      setTimeout(() => { if (active) generateWatermark(); }, 0);
-    }
-    return () => { active = false; };
-  }, [uploadedFile, options, generateWatermark]);
+    if (!uploadedFile) return;
+    const timer = setTimeout(() => {
+      generateWatermark();
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [uploadedFile, generateWatermark]);
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
@@ -121,16 +123,18 @@ export default function WatermarkImageClient() {
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300">Position</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: 'Tile Repeat', pos: 'tile' },
-                    { label: 'Center', pos: 'center' },
-                    { label: 'Bottom Right', pos: 'bottom-right' }
-                  ].map((p) => (
+                  {(
+                    [
+                      { label: 'Tile Repeat', pos: 'tile' },
+                      { label: 'Center', pos: 'center' },
+                      { label: 'Bottom Right', pos: 'bottom-right' }
+                    ] as const
+                  ).map((p) => (
                     <button
                       key={p.pos}
                       type="button"
-                      onClick={() => setOptions({ ...options, position: p.pos as any })}
-                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                      onClick={() => setOptions({ ...options, position: p.pos })}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                         options.position === p.pos
                           ? 'bg-blue-600 border-blue-400 text-white'
                           : 'bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/[0.08]'

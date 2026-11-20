@@ -70,6 +70,88 @@ export const ToolAdvancedOptions: React.FC<ToolAdvancedOptionsProps> = ({
         </div>
       </div>
 
+      {/* 1-Click Passport White Background */}
+      <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[11px] text-white font-bold block">Passport White Background</span>
+            <span className="text-[10px] text-slate-400">Replace colored backdrop for UPSC / NEET / Passport</span>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              onRequirementsChange({
+                ...requirements,
+                whiteBg: {
+                  enabled: !requirements.whiteBg?.enabled,
+                  tolerance: requirements.whiteBg?.tolerance ?? 42,
+                  fillColor: requirements.whiteBg?.fillColor || '#FFFFFF'
+                }
+              })
+            }
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+              requirements.whiteBg?.enabled
+                ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300'
+                : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white'
+            }`}
+          >
+            {requirements.whiteBg?.enabled ? 'Active' : 'Enable'}
+          </button>
+        </div>
+
+        {requirements.whiteBg?.enabled && (
+          <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between text-[10px] text-slate-300">
+              <span>Edge Sensitivity</span>
+              <span className="font-mono text-blue-300 font-bold">{requirements.whiteBg.tolerance ?? 42}</span>
+            </div>
+            <input
+              type="range"
+              min="15"
+              max="90"
+              step="1"
+              value={requirements.whiteBg.tolerance ?? 42}
+              onChange={(e) =>
+                onRequirementsChange({
+                  ...requirements,
+                  whiteBg: {
+                    ...requirements.whiteBg!,
+                    tolerance: Number(e.target.value)
+                  }
+                })
+              }
+              className="w-full h-1.5 bg-slate-800 rounded-lg accent-emerald-400 cursor-pointer"
+            />
+            <div className="flex items-center gap-1.5 pt-1">
+              {[
+                { name: 'Pure White', color: '#FFFFFF' },
+                { name: 'Off-White', color: '#F8FAFC' },
+                { name: 'Sky Blue', color: '#E0F2FE' }
+              ].map((sw) => (
+                <button
+                  key={sw.color}
+                  type="button"
+                  onClick={() =>
+                    onRequirementsChange({
+                      ...requirements,
+                      whiteBg: { ...requirements.whiteBg!, fillColor: sw.color }
+                    })
+                  }
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-semibold cursor-pointer ${
+                    (requirements.whiteBg?.fillColor || '#FFFFFF') === sw.color
+                      ? 'border-emerald-400 bg-emerald-500/15 text-white'
+                      : 'border-white/10 text-slate-400'
+                  }`}
+                >
+                  <span className="w-2.5 h-2.5 rounded-full border border-slate-500" style={{ backgroundColor: sw.color }} />
+                  <span>{sw.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Photo Name & Date Stamp */}
       <PhotoStampOptions
         config={requirements.photoStamp}

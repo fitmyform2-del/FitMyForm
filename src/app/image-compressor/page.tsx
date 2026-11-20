@@ -14,16 +14,15 @@ export default function ImageCompressorPage() {
       config={{
         title: 'Compress Image to Target KB',
         badge: 'Exact KB Control',
-        description: 'Compress JPG, PNG, WEBP images to exact KB limits (e.g. 20–50 KB, 50–100 KB, 100–200 KB) without losing quality.',
+        description: 'Compress JPG, PNG, WEBP images to exact KB limits (e.g. 20–50 KB, 50–100 KB, 100–200 KB) while preserving original proportions.',
+        preserveDimensionsOnUpload: true,
         defaultRequirements: {
           documentType: 'other',
-          width: 800,
-          height: 800,
           format: 'JPG',
-          minSizeKB: 20,
+          minSizeKB: 10,
           maxSizeKB: 50,
           bgColor: '#FFFFFF',
-          cropMode: 'fill'
+          cropMode: 'fit'
         },
         seoTitle: 'Compress Images to Exact KB Limits Online',
         seoDescription: 'Free online image compressor with precise file size controls for portals that enforce strict maximum upload sizes.',

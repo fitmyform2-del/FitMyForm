@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import HomePage from '../page';
+import JpgToImageClient from '../jpg-to-image/JpgToImageClient';
 
 export const metadata: Metadata = {
   title: 'Convert JPG to Transparent / Lossless PNG Format | FitMyForm',
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function ImageToPngPage() {
-  return <HomePage />;
+  return <JpgToImageClient />;
 }

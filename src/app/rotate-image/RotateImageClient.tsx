@@ -7,7 +7,7 @@ import { DropzoneUpload } from '@/components/upload/DropzoneUpload';
 import { SeoContentSection } from '@/components/seo/SeoContentSection';
 import { UploadedFile } from '@/types/document';
 import { rotateAndFlipCanvas } from '@/lib/image/editorTools';
-import { RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Download, CheckCircle2, Settings2 } from 'lucide-react';
+import { RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Download, Settings2 } from 'lucide-react';
 
 export default function RotateImageClient() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -156,19 +156,21 @@ export default function RotateImageClient() {
                   <div className="space-y-2 pt-3 text-xs animate-fade-in">
                     <label className="text-slate-400 font-bold uppercase text-[10px] block">Output Format</label>
                     <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { label: 'JPG', val: 'image/jpeg' },
-                        { label: 'PNG', val: 'image/png' },
-                        { label: 'WEBP', val: 'image/webp' }
-                      ].map((fmt) => (
+                      {(
+                        [
+                          { label: 'JPG', val: 'image/jpeg' },
+                          { label: 'PNG', val: 'image/png' },
+                          { label: 'WEBP', val: 'image/webp' }
+                        ] as const
+                      ).map((fmt) => (
                         <button
                           key={fmt.label}
                           type="button"
                           onClick={() => {
-                            setOutputFormat(fmt.val as any);
-                            applyTransformation(angle, flipH, flipV, fmt.val as any);
+                            setOutputFormat(fmt.val);
+                            applyTransformation(angle, flipH, flipV, fmt.val);
                           }}
-                          className={`py-1.5 rounded-lg border text-xs font-bold ${
+                          className={`py-1.5 rounded-lg border text-xs font-bold cursor-pointer ${
                             outputFormat === fmt.val ? 'bg-blue-600 border-blue-400 text-white' : 'border-white/10 text-slate-400'
                           }`}
                         >
@@ -184,7 +186,7 @@ export default function RotateImageClient() {
               {rotatedUrl ? (
                 <a
                   href={rotatedUrl}
-                  download={`rotated-${uploadedFile.name}`}
+                  download={`rotated-${uploadedFile.name.replace(/\.[^/.]+$/, '')}.${outputFormat === 'image/png' ? 'png' : outputFormat === 'image/webp' ? 'webp' : 'jpg'}`}
                   className="w-full fmf-btn-primary py-4 text-sm font-black flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download className="w-5 h-5" />
