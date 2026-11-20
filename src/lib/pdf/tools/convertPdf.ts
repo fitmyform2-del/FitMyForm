@@ -1,7 +1,6 @@
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
-import { JpgToPdfOptions, AnnotationItem, hexToRgb } from './types';
-import { sanitizeWinAnsi } from '../pdfjsLoader';
+import { JpgToPdfOptions } from './types';
 
 /** Convert any browser-readable image file (WEBP, GIF, SVG, BMP, etc.) into JPEG bytes via Canvas */
 async function rasterizeImageFileToJpeg(file: File): Promise<ArrayBuffer> {
@@ -99,51 +98,6 @@ export async function imagesToPdf(files: File[], opts: JpgToPdfOptions): Promise
       height: drawH
     });
   }
-
-  const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
-  return new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
-}
-
-/** EDIT PDF ANNOTATIONS */
-export async function editPdf(file: File, annotations: AnnotationItem[]): Promise<Blob> {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-  const pages = pdfDoc.getPages();
-  const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  annotations.forEach((ann) => {
-    const page = pages[ann.pageIndex];
-    if (!page) return;
-
-    const { width, height } = page.getSize();
-    const color = hexToRgb(ann.color || '#3b82f6');
-
-    if (ann.type === 'text' && ann.text) {
-      const size = ann.fontSize || 16;
-      const x = ann.xRatio * width;
-      const y = (1 - ann.yRatio) * height - size;
-      page.drawText(sanitizeWinAnsi(ann.text), {
-        x,
-        y: Math.max(4, y),
-        size,
-        font,
-        color
-      });
-    } else if (ann.type === 'rect' && ann.wRatio && ann.hRatio) {
-      const w = ann.wRatio * width;
-      const h = ann.hRatio * height;
-      const x = ann.xRatio * width;
-      const y = (1 - ann.yRatio) * height - h;
-      page.drawRectangle({
-        x,
-        y,
-        width: w,
-        height: h,
-        borderColor: color,
-        borderWidth: 2
-      });
-    }
-  });
 
   const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
   return new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });

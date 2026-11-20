@@ -4,6 +4,8 @@ import { toPixels, fromPixels, formatDimensionDisplay } from '@/lib/utils/unitCo
 import { EXAM_PRESETS } from '@/config/presets';
 import { PASSPORT_SHEET_SPECS } from '@/lib/image/tools/passportSheet';
 import { applyWhiteBackground } from '@/lib/image/tools/whiteBgTools';
+import { PDFDocument } from 'pdf-lib';
+import { editPdf } from '@/lib/pdf/tools/editPdf';
 
 describe('unitConverter', () => {
   it('converts cm, mm, and inches accurately to pixels at 200 and 300 DPI', () => {
@@ -144,5 +146,39 @@ describe('applyWhiteBackground flood-fill', () => {
     // Center subject pixel (10,10) should remain untouched
     const centerIdx = (10 * w + 10) * 4;
     assert.deepEqual([pixels[centerIdx], pixels[centerIdx + 1], pixels[centerIdx + 2]], [60, 45, 40]);
+  });
+});
+
+describe('editPdf rich export engine', () => {
+  it('applies text, highlight, whiteout, shapes, arrow, draw, check, stamp and blank-page insertion cleanly', async () => {
+    const basePdf = await PDFDocument.create();
+    basePdf.addPage([595, 842]);
+    const baseBytes = await basePdf.save();
+    const fakeFile = new File([baseBytes as unknown as BlobPart], 'sample.pdf', { type: 'application/pdf' });
+
+    const outBlob = await editPdf(
+      fakeFile,
+      [
+        { type: 'text', pageIndex: 0, xRatio: 0.1, yRatio: 0.1, text: 'Hello\nWorld', fontFamily: 'TimesRoman', bold: true, italic: true, bgColor: '#ffffff', fontSize: 18, color: '#1d4ed8' },
+        { type: 'highlight', pageIndex: 0, xRatio: 0.1, yRatio: 0.2, wRatio: 0.3, hRatio: 0.03, color: '#fde047', opacity: 0.4 },
+        { type: 'whiteout', pageIndex: 0, xRatio: 0.1, yRatio: 0.3, wRatio: 0.2, hRatio: 0.04, fillColor: '#ffffff' },
+        { type: 'rect', pageIndex: 0, xRatio: 0.4, yRatio: 0.4, wRatio: 0.2, hRatio: 0.1, color: '#dc2626', fillColor: '#dc2626', strokeWidth: 3 },
+        { type: 'circle', pageIndex: 0, xRatio: 0.65, yRatio: 0.4, wRatio: 0.15, hRatio: 0.1, color: '#16a34a' },
+        { type: 'arrow', pageIndex: 0, xRatio: 0.1, yRatio: 0.6, x2Ratio: 0.35, y2Ratio: 0.65, color: '#7c3aed', strokeWidth: 2 },
+        { type: 'draw', pageIndex: 0, xRatio: 0.2, yRatio: 0.7, color: '#0f172a', strokeWidth: 2, points: [{ x: 0.2, y: 0.7 }, { x: 0.25, y: 0.72 }, { x: 0.3, y: 0.7 }] },
+        { type: 'check', pageIndex: 0, xRatio: 0.5, yRatio: 0.7, wRatio: 0.04, hRatio: 0.03, color: '#16a34a' },
+        { type: 'cross', pageIndex: 0, xRatio: 0.56, yRatio: 0.7, wRatio: 0.04, hRatio: 0.03, color: '#dc2626' },
+        { type: 'stamp', pageIndex: 1, xRatio: 0.3, yRatio: 0.3, wRatio: 0.25, hRatio: 0.07, text: 'APPROVED', color: '#dc2626' }
+      ],
+      [
+        { sourceIndex: 0, rotation: 90 },
+        { sourceIndex: -1, rotation: 0, width: 595, height: 842 }
+      ]
+    );
+
+    assert.equal(outBlob.type, 'application/pdf');
+    const loaded = await PDFDocument.load(await outBlob.arrayBuffer());
+    assert.equal(loaded.getPageCount(), 2);
+    assert.equal(loaded.getPage(0).getRotation().angle, 90);
   });
 });

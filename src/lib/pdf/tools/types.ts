@@ -34,17 +34,55 @@ export interface RedactionArea {
   hRatio: number; // 0 to 1
 }
 
+export type AnnotationType =
+  | 'text'
+  | 'highlight'
+  | 'whiteout'
+  | 'rect'
+  | 'circle'
+  | 'line'
+  | 'arrow'
+  | 'draw'
+  | 'image'
+  | 'check'
+  | 'cross'
+  | 'stamp';
+
+export type PdfFontFamily = 'Helvetica' | 'TimesRoman' | 'Courier';
+
 export interface AnnotationItem {
-  type: 'text' | 'rect' | 'circle' | 'line' | 'draw';
+  id?: string;
+  type: AnnotationType;
   pageIndex: number;
   xRatio: number;
   yRatio: number;
   wRatio?: number;
   hRatio?: number;
+  /** End point for line & arrow tools (0..1) */
+  x2Ratio?: number;
+  y2Ratio?: number;
   text?: string;
   color?: string;
+  fillColor?: string;
+  bgColor?: string;
   fontSize?: number;
+  fontFamily?: PdfFontFamily;
+  bold?: boolean;
+  italic?: boolean;
+  strokeWidth?: number;
+  opacity?: number;
+  imageDataUrl?: string;
   points?: { x: number; y: number }[];
+}
+
+export interface PdfPagePlanItem {
+  /** Original 0-based page index, or -1 for an inserted blank page */
+  sourceIndex: number;
+  /** Additional rotation in degrees (0, 90, 180, 270) */
+  rotation: number;
+  /** Optional dimensions for blank pages */
+  width?: number;
+  height?: number;
 }
 
 export interface SignField {
